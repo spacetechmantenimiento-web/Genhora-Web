@@ -1,0 +1,149 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "overflow": false,
+      "logoWidth": 174,
+      "titleSize": "43px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8003126221180149,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 216.20000000298023,
+          "bytes": 15922
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "logoWidth": 174,
+      "titleSize": "43px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8002858163629868,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 16.69999999552965,
+          "bytes": 300
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "logoWidth": 185,
+      "titleSize": "43.776px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8002971445136976,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 16.700000002980232,
+          "bytes": 300
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    },
+    {
+      "width": 1024,
+      "overflow": false,
+      "logoWidth": 185,
+      "titleSize": "57.344px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8003059805285119,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 20.5,
+          "bytes": 300
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "logoWidth": 196,
+      "titleSize": "83.52px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8002885655885535,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 12.399999998509884,
+          "bytes": 300
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    },
+    {
+      "width": 1920,
+      "overflow": false,
+      "logoWidth": 196,
+      "titleSize": "84px",
+      "imageLoaded": true,
+      "imageAspectRatio": 0.8002885655885535,
+      "layoutShift": 0,
+      "imageResource": [
+        {
+          "duration": 14.700000002980232,
+          "bytes": 300
+        }
+      ],
+      "titleLinesFit": true,
+      "violations": []
+    }
+  ],
+  "links": [
+    {
+      "href": "/",
+      "status": 200
+    },
+    {
+      "href": "/productos",
+      "status": 200
+    },
+    {
+      "href": "/personaliza",
+      "status": 200
+    },
+    {
+      "href": "/empresas-y-eventos",
+      "status": 200
+    },
+    {
+      "href": "/nosotros",
+      "status": 200
+    },
+    {
+      "href": "/contacto",
+      "status": 200
+    }
+  ],
+  "interactions": [
+    "Primary CTA opens the real product catalog",
+    "Secondary CTA opens the catalog",
+    "Keyboard skip link; mobile menu, Escape and focus return at all collapsed widths",
+    "Mobile link navigates and closes menu",
+    "Finite entrance animations complete; reduced motion remains readable"
+  ],
+  "errors": [],
+  "scope": {
+    "changedExistingFiles": [
+      "src/app/page.tsx",
+      "src/app/globals.css",
+      "src/components/header.tsx"
+    ],
+    "unexpectedChanges": [],
+    "protectedFilesChecked": 32
+  }
+}

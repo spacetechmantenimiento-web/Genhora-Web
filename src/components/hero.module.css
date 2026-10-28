@@ -1,0 +1,583 @@
+.hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  align-items: center;
+  gap: clamp(24px, 3.2vw, 46px);
+  padding-top: 38px;
+  padding-bottom: 44px;
+}
+.copy {
+  padding-block: 30px 48px;
+  min-width: 0;
+}
+.copy > :global(.eyebrow) {
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  margin-bottom: 28px;
+}
+.title {
+  font-size: clamp(48px, 5.8vw, 84px);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+.title > span,
+.title > em {
+  display: block;
+  white-space: nowrap;
+}
+.title > em {
+  margin-top: 7px;
+}
+.description {
+  max-width: 390px;
+  margin-top: 27px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.85;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 19px 26px;
+  margin-top: 32px;
+}
+.actions :global(.button) {
+  min-height: 56px;
+  padding: 16px 25px;
+  gap: 36px;
+  font-size: 13px;
+  letter-spacing: 0;
+  transition:
+    background 0.25s var(--ease),
+    transform 0.25s var(--ease);
+}
+.actions :global(.button):hover,
+.actions :global(.button):focus-visible {
+  background: #365f48;
+}
+.actions :global(.button):hover :global(.arrow),
+.actions :global(.button):focus-visible :global(.arrow) {
+  transform: translateX(4px);
+}
+.actions :global(.button):active {
+  transform: translateY(2px);
+  background: #173d28;
+}
+.explore {
+  position: relative;
+  display: inline-flex;
+  gap: 16px;
+  align-items: center;
+  min-height: 48px;
+  padding-block: 10px;
+  font-size: 12px;
+}
+.explore::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--forest);
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform 0.3s var(--ease);
+}
+.explore:hover::after,
+.explore:focus-visible::after {
+  transform: scaleX(1);
+}
+.explore:hover :global(.arrow),
+.explore:focus-visible :global(.arrow) {
+  transform: translateX(4px);
+}
+.explore:active {
+  opacity: 0.75;
+}
+.signature {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 44px;
+  font: italic 21px/1.4 var(--font-display);
+}
+.signature > span {
+  width: 34px;
+  height: 1px;
+  background: var(--green);
+}
+.stage {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 0 0 auto;
+  position: relative;
+  min-width: 0;
+}
+.scene {
+  position: relative;
+  overflow: hidden;
+  border-radius: 46% 46% 0 0 / 27% 27% 0 0;
+  background: var(--stone);
+}
+.photograph {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1122 / 1402;
+  object-fit: contain;
+}
+.seal {
+  position: absolute;
+  left: -42px;
+  top: 40px;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: var(--ivory);
+  border: 1px solid var(--forest);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+.seal img {
+  width: 47px;
+  height: 47px;
+}
+.seal span {
+  font-size: 9px;
+  letter-spacing: 0.01em;
+}
+.marker {
+  position: absolute;
+  width: 25px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--ivory);
+  color: var(--forest);
+  font: 500 10px/1 var(--font-body);
+  pointer-events: none;
+}
+.designMarker {
+  left: 87%;
+  top: 29%;
+}
+.storyMarker {
+  left: 8%;
+  top: 57%;
+}
+.nameMarker {
+  left: 91%;
+  top: 72%;
+}
+.caption {
+  padding-top: 18px;
+}
+.notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.notes li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.notes li > span {
+  font: 500 9px var(--font-body);
+}
+.notes em {
+  font: italic 23px/1.15 var(--font-display);
+  white-space: nowrap;
+}
+.notes small {
+  display: block;
+  font-size: 10px;
+  margin-top: 5px;
+  color: var(--muted);
+}
+.caption > p {
+  border-top: 1px solid var(--line);
+  padding-top: 13px;
+  margin-top: 15px;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.ribbon {
+  border-block: 1px solid var(--line);
+  background: #edf0e7;
+}
+.ribbon ul {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  padding-block: 25px;
+}
+.ribbon li {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  font-size: 13px;
+  padding-inline: 15px;
+  line-height: 1.6;
+}
+.ribbon li + li {
+  border-left: 1px solid #bdcaba;
+}
+.ribbon li > span {
+  font: italic 15px var(--font-display);
+}
+.ribbon .ribbonSignature {
+  font: italic 24px/1.1 var(--font-display);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .title {
+    animation: enter 0.8s var(--ease) both;
+  }
+  .description {
+    animation: enter 0.8s 0.08s var(--ease) both;
+  }
+  .actions {
+    animation: enter 0.8s 0.16s var(--ease) both;
+  }
+  .signature {
+    animation: enter 0.8s 0.22s var(--ease) both;
+  }
+  .photograph {
+    animation: photograph-in 1s var(--ease) both;
+  }
+  .caption {
+    animation: enter 0.8s 0.18s var(--ease) both;
+  }
+}
+@keyframes enter {
+  from {
+    opacity: 0.25;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes photograph-in {
+  from {
+    opacity: 0.6;
+    transform: scale(1.015);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (max-width: 1200px) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+  }
+  .title {
+    font-size: clamp(46px, 5.6vw, 67px);
+  }
+  .copy > :global(.eyebrow) {
+    font-size: 10px;
+    letter-spacing: 0.09em;
+  }
+  .description {
+    font-size: 14px;
+  }
+  .actions {
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .signature {
+    margin-top: 27px;
+    font-size: 20px;
+  }
+  .seal {
+    width: 87px;
+    height: 87px;
+    left: -24px;
+    top: 25px;
+  }
+  .seal img {
+    width: 40px;
+    height: 40px;
+  }
+  .seal span {
+    font-size: 8px;
+  }
+  .notes em {
+    font-size: 20px;
+  }
+  .notes small {
+    font-size: 9px;
+  }
+  .ribbon li {
+    font-size: 11px;
+    gap: 9px;
+  }
+  .ribbon .ribbonSignature {
+    font-size: 23px;
+  }
+}
+@media (min-width: 601px) and (max-width: 850px) {
+  .hero {
+    grid-template-columns: 0.95fr 1fr;
+    gap: 26px;
+    padding-top: 32px;
+    padding-bottom: 34px;
+  }
+  .copy {
+    padding-block: 24px;
+  }
+  .title {
+    font-size: clamp(36px, 5.7vw, 48px);
+  }
+  .copy > :global(.eyebrow) {
+    max-width: 240px;
+    font-size: 10px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .description {
+    font-size: 13px;
+    line-height: 1.8;
+    margin-top: 24px;
+  }
+  .actions {
+    margin-top: 23px;
+  }
+  .actions :global(.button) {
+    font-size: 12px;
+    padding-inline: 21px;
+  }
+  .explore {
+    font-size: 11px;
+    gap: 9px;
+  }
+  .notes li {
+    display: block;
+  }
+  .notes li > span {
+    display: block;
+    margin-bottom: 5px;
+  }
+  .notes em {
+    font-size: 19px;
+  }
+  .caption > p {
+    font-size: 10px;
+  }
+  .seal {
+    width: 76px;
+    height: 76px;
+    left: -13px;
+    top: 5px;
+  }
+  .seal img {
+    width: 33px;
+    height: 33px;
+  }
+  .seal span {
+    font-size: 7px;
+  }
+  .marker {
+    width: 22px;
+    height: 18px;
+    font-size: 9px;
+  }
+  .signature {
+    font-size: 18px;
+  }
+  .ribbon ul {
+    padding-block: 22px;
+  }
+  .ribbon li {
+    padding-inline: 9px;
+    font-size: 10px;
+    gap: 6px;
+  }
+  .ribbon .ribbonSignature {
+    font-size: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 27px;
+    padding-top: 25px;
+    padding-bottom: 28px;
+  }
+  .copy {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  .copy > :global(.eyebrow) {
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    margin-bottom: 18px;
+  }
+  .title {
+    font-size: clamp(43px, 10.7vw, 62px);
+    line-height: 1.03;
+    letter-spacing: -0.038em;
+  }
+  .title em {
+    margin-top: 4px;
+  }
+  .description {
+    font-size: 14px;
+    line-height: 1.8;
+    max-width: 420px;
+    margin-top: 19px;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    margin-top: 23px;
+  }
+  .actions :global(.button) {
+    width: 100%;
+    font-size: 13px;
+    min-height: 54px;
+    padding: 14px 20px;
+  }
+  .explore {
+    width: fit-content;
+    justify-self: center;
+    min-height: 46px;
+    font-size: 12px;
+    gap: 14px;
+  }
+  .explore::after {
+    transform: scaleX(1);
+    background: var(--line);
+  }
+  .explore:hover::after,
+  .explore:focus-visible::after {
+    background: var(--forest);
+  }
+  .signature {
+    display: none;
+  }
+  .stage {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .scene {
+    border-radius: 35% 35% 0 0 / 17% 17% 0 0;
+  }
+  .seal {
+    left: auto;
+    right: -5px;
+    top: 12px;
+    width: 82px;
+    height: 82px;
+  }
+  .seal img {
+    width: 36px;
+    height: 36px;
+  }
+  .seal span {
+    font-size: 8px;
+  }
+  .marker {
+    width: 23px;
+    height: 19px;
+    font-size: 9px;
+  }
+  .caption {
+    padding-top: 16px;
+  }
+  .notes {
+    gap: 9px;
+  }
+  .notes li {
+    display: block;
+    border-top: 1px solid var(--line);
+    padding-top: 9px;
+  }
+  .notes li > span {
+    display: block;
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+  .notes em {
+    font-size: 23px;
+  }
+  .notes small {
+    font-size: 10px;
+    margin-top: 4px;
+  }
+  .caption > p {
+    margin-top: 12px;
+    padding-top: 0;
+    border: 0;
+    font-size: 10px;
+  }
+  .ribbon ul {
+    grid-template-columns: 1fr 1fr;
+    padding-block: 18px;
+    gap: 0;
+  }
+  .ribbon li {
+    justify-content: flex-start;
+    padding: 12px 8px;
+    font-size: 12px;
+    gap: 10px;
+  }
+  .ribbon li + li {
+    border-left: 0;
+  }
+  .ribbon li:nth-child(even) {
+    border-left: 1px solid #bdcaba;
+    padding-left: 16px;
+  }
+  .ribbon li:nth-child(-n + 2) {
+    border-bottom: 1px solid #bdcaba;
+  }
+  .ribbon li > span {
+    font-size: 13px;
+  }
+  .ribbon .ribbonSignature {
+    font-size: 23px;
+  }
+}
+@media (max-width: 390px) {
+  .copy > :global(.eyebrow) {
+    font-size: 9px;
+    letter-spacing: 0.05em;
+  }
+  .title {
+    font-size: 43px;
+  }
+  .description {
+    font-size: 13px;
+  }
+  .notes em {
+    font-size: 21px;
+  }
+  .ribbon li {
+    font-size: 11px;
+    gap: 7px;
+    padding-inline: 4px;
+  }
+  .ribbon li:nth-child(even) {
+    padding-left: 12px;
+  }
+  .ribbon .ribbonSignature {
+    font-size: 22px;
+  }
+}

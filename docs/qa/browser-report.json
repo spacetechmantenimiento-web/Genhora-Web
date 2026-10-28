@@ -1,0 +1,363 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "route": "/",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/productos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/personaliza",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/empresas-y-eventos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/nosotros",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/contacto",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 360,
+      "route": "/productos/tote-bags",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/productos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/personaliza",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/empresas-y-eventos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/nosotros",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/contacto",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 390,
+      "route": "/productos/tote-bags",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/productos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/personaliza",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/empresas-y-eventos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/nosotros",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/contacto",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 768,
+      "route": "/productos/tote-bags",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/productos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/personaliza",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/empresas-y-eventos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/nosotros",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/contacto",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1024,
+      "route": "/productos/tote-bags",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/productos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/personaliza",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/empresas-y-eventos",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/nosotros",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/contacto",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    },
+    {
+      "width": 1440,
+      "route": "/productos/tote-bags",
+      "overflow": false,
+      "font": "\"serif\", \"serif Fallback\", Georgia, serif"
+    }
+  ],
+  "accessibility": [
+    {
+      "route": "/",
+      "violations": []
+    },
+    {
+      "route": "/productos",
+      "violations": []
+    },
+    {
+      "route": "/personaliza",
+      "violations": []
+    },
+    {
+      "route": "/empresas-y-eventos",
+      "violations": []
+    },
+    {
+      "route": "/nosotros",
+      "violations": []
+    },
+    {
+      "route": "/contacto",
+      "violations": []
+    },
+    {
+      "route": "/productos/tote-bags",
+      "violations": []
+    }
+  ],
+  "links": [
+    {
+      "href": "/",
+      "status": 200
+    },
+    {
+      "href": "/productos",
+      "status": 200
+    },
+    {
+      "href": "/personaliza",
+      "status": 200
+    },
+    {
+      "href": "/empresas-y-eventos",
+      "status": 200
+    },
+    {
+      "href": "/nosotros",
+      "status": 200
+    },
+    {
+      "href": "/contacto",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=estilo",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=regalos",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=eventos",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=business",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=comunidades",
+      "status": 200
+    },
+    {
+      "href": "/productos/playeras",
+      "status": 200
+    },
+    {
+      "href": "/productos/tote-bags",
+      "status": 200
+    },
+    {
+      "href": "/productos/tazas",
+      "status": 200
+    },
+    {
+      "href": "/productos/libretas",
+      "status": 200
+    },
+    {
+      "href": "/productos/sudaderas",
+      "status": 200
+    },
+    {
+      "href": "/productos/termos",
+      "status": 200
+    },
+    {
+      "href": "/productos/invitaciones",
+      "status": 200
+    },
+    {
+      "href": "/productos/stickers",
+      "status": 200
+    },
+    {
+      "href": "/productos/llaveros",
+      "status": 200
+    },
+    {
+      "href": "/productos/articulos-corporativos",
+      "status": 200
+    },
+    {
+      "href": "/productos?categoria=textiles",
+      "status": 200
+    },
+    {
+      "href": "/productos?categoria=objetos",
+      "status": 200
+    },
+    {
+      "href": "/productos?categoria=papeleria",
+      "status": 200
+    },
+    {
+      "href": "/productos?categoria=corporativos",
+      "status": 200
+    },
+    {
+      "href": "/contacto?tipo=volumen",
+      "status": 200
+    },
+    {
+      "href": "/contacto?producto=tote-bags",
+      "status": 200
+    }
+  ],
+  "flow": [
+    "Product selection → contact → summary → clipboard; no WhatsApp when unconfigured",
+    "Combined filters: 1 textile event products",
+    "Empty filter state works",
+    "Mobile menu links, close, Escape and focus return",
+    "First keyboard target: Saltar al contenido",
+    "Unknown product: HTTP 404"
+  ],
+  "errors": []
+}

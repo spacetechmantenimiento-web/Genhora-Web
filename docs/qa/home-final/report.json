@@ -1,0 +1,128 @@
+{
+  "viewports": [
+    {
+      "width": 360,
+      "overflow": false,
+      "brokenImages": [],
+      "markerPointerEvents": "none",
+      "stepFontSize": "13px",
+      "storyFontSize": "13px",
+      "accessibilityViolations": []
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "brokenImages": [],
+      "markerPointerEvents": "none",
+      "stepFontSize": "13px",
+      "storyFontSize": "13px",
+      "accessibilityViolations": []
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "brokenImages": [],
+      "markerPointerEvents": "none",
+      "stepFontSize": "13px",
+      "storyFontSize": "13px",
+      "accessibilityViolations": []
+    },
+    {
+      "width": 1024,
+      "overflow": false,
+      "brokenImages": [],
+      "markerPointerEvents": "none",
+      "stepFontSize": "13px",
+      "storyFontSize": "13px",
+      "accessibilityViolations": []
+    },
+    {
+      "width": 1440,
+      "overflow": false,
+      "brokenImages": [],
+      "markerPointerEvents": "none",
+      "stepFontSize": "13px",
+      "storyFontSize": "13px",
+      "accessibilityViolations": []
+    }
+  ],
+  "links": [
+    {
+      "href": "/productos",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=estilo",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=regalos",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=eventos",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=business",
+      "status": 200
+    },
+    {
+      "href": "/productos?linea=comunidades",
+      "status": 200
+    },
+    {
+      "href": "/productos/playeras",
+      "status": 200
+    },
+    {
+      "href": "/productos/tote-bags",
+      "status": 200
+    },
+    {
+      "href": "/productos/tazas",
+      "status": 200
+    },
+    {
+      "href": "/productos/libretas",
+      "status": 200
+    },
+    {
+      "href": "/productos/sudaderas",
+      "status": 200
+    },
+    {
+      "href": "/productos/termos",
+      "status": 200
+    },
+    {
+      "href": "/productos/invitaciones",
+      "status": 200
+    },
+    {
+      "href": "/productos/stickers",
+      "status": 200
+    },
+    {
+      "href": "/productos/llaveros",
+      "status": 200
+    },
+    {
+      "href": "/productos/articulos-corporativos",
+      "status": 200
+    },
+    {
+      "href": "/contacto",
+      "status": 200
+    },
+    {
+      "href": "/empresas-y-eventos",
+      "status": 200
+    },
+    {
+      "href": "/nosotros",
+      "status": 200
+    }
+  ],
+  "errors": []
+}
