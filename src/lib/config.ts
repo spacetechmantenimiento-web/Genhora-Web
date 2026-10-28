@@ -1,6 +1,6 @@
 /** Public business information only. Never put secrets in this module. */
 export const siteConfig = {
-  url: 'http://127.0.0.1:3000', // Replace with the real origin only when publishing is authorized.
+  url: 'https://genhora-web.vercel.app',
   name: 'GENHORA',
   tagline: 'Es hora de crear.',
   country: 'México',

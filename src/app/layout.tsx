@@ -29,26 +29,35 @@ const serif = localFont({
 });
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: { default: 'GENHORA — Es hora de crear.', template: '%s | GENHORA' },
+  title: { default: 'GENHORA | Es hora de crear', template: '%s | GENHORA' },
   description:
-    'Estudio creativo de personalización en México. Productos, regalos y detalles para dar vida a tus ideas, tu marca y tus momentos.',
+    'Personaliza playeras, sudaderas, tote bags, tazas, termos y mucho más. En GENHORA convertimos tus ideas en productos únicos.',
   applicationName: 'GENHORA',
   openGraph: {
     type: 'website',
     locale: 'es_MX',
     siteName: 'GENHORA',
-    title: 'GENHORA — Es hora de crear.',
-    description: 'Ideas con identidad. Objetos con significado.',
+    url: '/',
+    title: 'GENHORA | Es hora de crear',
+    description:
+      'Personaliza playeras, sudaderas, tote bags, tazas, termos y mucho más. En GENHORA convertimos tus ideas en productos únicos.',
     images: [
       {
-        url: '/images/hero-studio.webp',
-        width: 1536,
-        height: 1024,
-        alt: 'Concepto editorial GENHORA: textil, tote bag y cerámica',
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'GENHORA. Es hora de crear. Tu idea, nuestro próximo gran diseño. Tote bag, sudadera y taza personalizadas.',
       },
     ],
   },
-  robots: { index: false, follow: false },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GENHORA | Es hora de crear',
+    description:
+      'Personaliza playeras, sudaderas, tote bags, tazas, termos y mucho más. En GENHORA convertimos tus ideas en productos únicos.',
+    images: ['/og-image.png'],
+  },
+  robots: { index: true, follow: true },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

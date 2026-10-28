@@ -1,8 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Hero } from '@/components/hero';
 import { Arrow, ClosingCTA, Eyebrow, ImageNote, ProductCard, TextLink } from '@/components/ui';
 import { BusinessSection, Collections, PersonalizeSection, Story } from '@/components/sections';
 import { products } from '@/lib/catalog';
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 export default function Home() {
   return (
     <>
