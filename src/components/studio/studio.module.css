@@ -71,10 +71,10 @@
 .productChoices small {
   display: block;
   margin-top: 3px;
-  font: 400 11px/1.5 var(--font-body);
+  font: 400 13px/1.5 var(--font-body);
 }
 .help {
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.65;
   color: #536a5b;
   margin: 8px 0 12px;
@@ -84,6 +84,136 @@
   gap: 12px;
   flex-wrap: wrap;
   margin-top: 18px;
+}
+.colorQuick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.colorQuick > button:not(.paletteToggle) {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  padding: 3px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+.colorQuick > button[aria-pressed='true'] {
+  border-color: var(--forest);
+}
+.colorQuick > button:not(.paletteToggle) span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+.colorQuick .paletteToggle {
+  width: auto;
+  height: 44px;
+  padding: 7px 12px;
+  border: 1px solid #9db5a1;
+  border-radius: 0;
+  font: 600 13px var(--font-body);
+  color: var(--forest);
+  background: transparent;
+  cursor: pointer;
+}
+.paletteToggle span {
+  margin-left: 7px;
+}
+.fontCategories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0;
+}
+.fontCategories button {
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid #a7b9a9;
+  background: transparent;
+  color: var(--forest);
+  font: 600 12px var(--font-body);
+  cursor: pointer;
+}
+.fontCategories button[aria-pressed='true'] {
+  background: var(--forest);
+  color: var(--ivory);
+}
+.fontChoices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.fontChoices button {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #c2d0c0;
+  background: #fffdf8;
+  color: var(--forest);
+  text-align: left;
+  cursor: pointer;
+}
+.fontChoices button[aria-pressed='true'] {
+  border: 2px solid var(--forest);
+  padding: 9px;
+}
+.fontChoices span {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 25px;
+  line-height: 1.15;
+}
+.fontChoices small {
+  display: block;
+  font: 600 10px var(--font-body);
+  margin-top: 8px;
+}
+.palettePanel {
+  padding: 15px;
+  border: 1px solid #bfcebd;
+  background: #fffdf8;
+  margin: 10px 0 18px;
+}
+.palettePanel .subhead {
+  margin: 0 0 7px;
+}
+.palettePanel .swatches {
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.palettePanel .swatches button {
+  width: 42px;
+  height: 42px;
+}
+.customColor {
+  display: grid;
+  grid-template-columns: 75px 1fr auto;
+  align-items: end;
+  gap: 8px;
+}
+.customColor label {
+  margin: 0;
+}
+.customColor input[type='color'] {
+  height: 38px;
+}
+.customColor input[type='text'] {
+  height: 38px;
+}
+.customColor button {
+  height: 44px;
+  border: 1px solid var(--forest);
+  background: var(--forest);
+  color: var(--ivory);
+  padding: 0 12px;
+  font: 600 13px var(--font-body);
 }
 .swatches button {
   width: 35px;
@@ -105,7 +235,7 @@
   border: 1px solid rgba(0, 0, 0, 0.18);
 }
 .selectedColor {
-  font-size: 12px;
+  font-size: 13px;
   margin: 10px 0 16px;
 }
 .segment {
@@ -115,12 +245,13 @@
 }
 .segment button {
   min-width: 105px;
+  min-height: 44px;
   padding: 9px 15px;
   border: 0;
   background: transparent;
   color: var(--forest);
   text-transform: capitalize;
-  font: 600 12px var(--font-body);
+  font: 600 13px var(--font-body);
 }
 .segment button[aria-pressed='true'] {
   color: var(--ivory);
@@ -141,8 +272,9 @@
   border: 1px solid #9db5a1;
   color: var(--forest);
   background: transparent;
+  min-height: 42px;
   padding: 10px 13px;
-  font: 600 11px var(--font-body);
+  font: 600 13px var(--font-body);
 }
 .toolActions button:hover,
 .motifs button:hover,
@@ -174,7 +306,7 @@
 .group label,
 .quoteFields label {
   display: block;
-  font: 600 11px/1.5 var(--font-body);
+  font: 600 13px/1.5 var(--font-body);
   margin: 12px 0;
 }
 .group label span {
@@ -275,7 +407,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .previewFoot input {
   accent-color: var(--forest);
@@ -380,6 +512,12 @@
   }
 }
 @media (max-width: 640px) {
+  .customColor {
+    grid-template-columns: 70px 1fr;
+  }
+  .customColor button {
+    grid-column: 1 / -1;
+  }
   .studio {
     padding: 22px 18px 70px;
   }

@@ -3,12 +3,24 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { siteConfig, whatsappUrl } from '@/lib/config';
-import { CANVAS_SIZE, drawScene, hitLayer, layerOutside } from '@/lib/studio-canvas';
 import {
+  CANVAS_SIZE,
+  constrainLayer,
+  drawScene,
+  ensureStudioFont,
+  hitLayer,
+  layerOutside,
+} from '@/lib/studio-canvas';
+import {
+  colorHex,
+  colorName,
   fontOptions,
+  fontSupportsBold,
   initialDesigns,
   motifs,
+  printArea,
   studioProducts,
+  studioColors,
   type Artwork,
   type Designs,
   type FontId,
@@ -20,6 +32,10 @@ import styles from './studio.module.css';
 type History = { past: Designs[]; present: Designs; future: Designs[] };
 const newId = () => crypto.randomUUID();
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const darkColor = (hex: string) => {
+  const rgb = [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16));
+  return rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114 < 135;
+};
 
 export function Studio() {
   const [productId, setProductId] = useState<ProductId>('playera');
@@ -36,6 +52,11 @@ export function Studio() {
   const [feedback, setFeedback] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [outside, setOutside] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [hexInput, setHexInput] = useState('');
+  const [hexError, setHexError] = useState('');
+  const [fontCategory, setFontCategory] = useState('Elegantes');
+  const [fontReady, setFontReady] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const imagesRef = useRef(new Map<string, HTMLImageElement>());
@@ -44,8 +65,38 @@ export function Studio() {
   const design = history.present[productId];
   const layers = design.layers[design.side];
   const selected = layers.find((layer) => layer.id === selectedId);
-  const color =
-    product.colors.find((entry) => entry.name === design.color)?.value ?? product.colors[0].value;
+  const color = colorHex(design.color);
+  useEffect(() => {
+    let active = true;
+    const loading = [
+      ...layers
+        .filter((layer): layer is Extract<Artwork, { kind: 'text' }> => layer.kind === 'text')
+        .map((layer) =>
+          ensureStudioFont(layer.font, layer.weight ?? (layer.font === 'bold' ? 700 : 400)),
+        ),
+      ...fontOptions
+        .filter((option) => option.category === fontCategory)
+        .map((option) => ensureStudioFont(option.id)),
+    ];
+    Promise.all(loading)
+      .then(() => {
+        if (active) setFontReady((value) => value + 1);
+      })
+      .catch(() => {
+        if (active)
+          setFeedback(
+            'Una tipografía no pudo cargarse; comprueba tu conexión e inténtalo de nuevo.',
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [layers, fontCategory]);
+  function selectColor(selection: string) {
+    changeDesign((current) => ({ ...current, color: selection }));
+    setHexInput(colorHex(selection));
+    setHexError('');
+  }
 
   function change(next: (current: Designs) => Designs) {
     setHistory((current) => ({
@@ -65,9 +116,14 @@ export function Studio() {
   }
   function changeLayer(patch: Partial<Artwork>) {
     if (!selectedId) return;
+    const ctx = canvasRef.current?.getContext('2d');
     changeLayers((current) =>
       current.map((layer) =>
-        layer.id === selectedId ? ({ ...layer, ...patch } as Artwork) : layer,
+        layer.id === selectedId
+          ? ctx
+            ? constrainLayer(ctx, { ...layer, ...patch } as Artwork, product, design.side)
+            : ({ ...layer, ...patch } as Artwork)
+          : layer,
       ),
     );
   }
@@ -80,10 +136,12 @@ export function Studio() {
       scale: 1,
       angle: 0,
       text,
-      color: ['Negro', 'Verde bosque'].includes(design.color) ? '#F9F7F0' : '#294D3A',
+      color: darkColor(color) ? '#F9F7F0' : '#294D3A',
       font,
     };
-    changeLayers((current) => [...current, layer]);
+    const ctx = canvasRef.current?.getContext('2d');
+    const fitted = ctx ? constrainLayer(ctx, layer, product, design.side) : layer;
+    changeLayers((current) => [...current, fitted]);
     setSelectedId(layer.id);
     setFeedback('Texto añadido. Arrástralo sobre el producto o usa los controles.');
   }
@@ -105,7 +163,9 @@ export function Studio() {
       pixelWidth,
       pixelHeight,
     };
-    changeLayers((current) => [...current, layer]);
+    const ctx = canvasRef.current?.getContext('2d');
+    const fitted = ctx ? constrainLayer(ctx, layer, product, design.side) : layer;
+    changeLayers((current) => [...current, fitted]);
     setSelectedId(layer.id);
     setFeedback('Imagen añadida al área de personalización.');
   }
@@ -166,11 +226,11 @@ export function Studio() {
         images: imagesRef.current,
       });
       const active = layers.find((layer) => layer.id === selectedId);
-      setOutside(active ? layerOutside(ctx, active, product) : false);
+      setOutside(active ? layerOutside(ctx, active, product, design.side) : false);
     }
     document.fonts.ready.then(redraw);
     redraw();
-  }, [product, color, design.side, layers, selectedId, guides]);
+  }, [product, color, design.side, layers, selectedId, guides, fontReady]);
 
   useEffect(() => {
     if (
@@ -212,8 +272,10 @@ export function Studio() {
   }
   function pointerMove(event: React.PointerEvent<HTMLCanvasElement>) {
     if (!dragRef.current) return;
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
     const point = canvasPosition(event);
-    const area = product.area;
+    const area = printArea(product, design.side);
     const x = clamp((point.x - area.x) / area.width, 0.02, 0.98);
     const y = clamp((point.y - area.y) / area.height, 0.02, 0.98);
     const id = dragRef.current.id;
@@ -227,7 +289,9 @@ export function Studio() {
           layers: {
             ...current.present[productId].layers,
             [design.side]: current.present[productId].layers[design.side].map((layer) =>
-              layer.id === id ? { ...layer, x, y } : layer,
+              layer.id === id
+                ? constrainLayer(ctx, { ...layer, x, y }, product, design.side)
+                : layer,
             ),
           },
         },
@@ -268,8 +332,15 @@ export function Studio() {
   }
 
   async function renderExport(side: Side) {
-    await document.fonts.ready;
     const target = history.present[productId];
+    await Promise.all(
+      target.layers[side]
+        .filter((layer): layer is Extract<Artwork, { kind: 'text' }> => layer.kind === 'text')
+        .map((layer) =>
+          ensureStudioFont(layer.font, layer.weight ?? (layer.font === 'bold' ? 700 : 400)),
+        ),
+    );
+    await document.fonts.ready;
     const imageLayers = target.layers[side].filter(
       (layer): layer is Extract<Artwork, { kind: 'image' }> => layer.kind === 'image',
     );
@@ -354,7 +425,7 @@ export function Studio() {
     ]
       .filter(Boolean)
       .join('; ') || 'Por definir';
-  const message = `Hola, GENHORA. Me gustaría cotizar una personalización que preparé en su sitio web.\n\nProducto: ${product.name}\nColor: ${design.color}\n${product.sizes ? `Talla: ${size}\n` : ''}Cantidad: ${quantity || 'Por definir'}\nPersonalización: ${personalization}\nUbicación: ${design.layers.espalda.length ? 'frente y espalda' : design.side}\nObservaciones: ${notes.trim() || 'Ninguna'}\n\nYa preparé una vista previa de mi diseño y me gustaría conocer su precio y tiempo estimado de elaboración.`;
+  const message = `Hola, GENHORA. Me gustaría cotizar una personalización que preparé en su sitio web.\n\nProducto: ${product.name}\nColor: ${colorName(design.color)} (${color})\n${product.sizes ? `Talla: ${size}\n` : ''}Cantidad: ${quantity || 'Por definir'}\nPersonalización: ${personalization}\nUbicación: ${design.layers.espalda.length ? 'frente y espalda' : design.side}\nObservaciones: ${notes.trim() || 'Ninguna'}\n\nYa preparé una vista previa de mi diseño y me gustaría conocer su precio y tiempo estimado de elaboración.`;
   const whatsapp = whatsappUrl(siteConfig.whatsappNumber, message);
   const validQuantity = /^\d+$/.test(quantity) && Number(quantity) > 0;
   return (
@@ -399,44 +470,98 @@ export function Studio() {
             <h2>
               <span>02</span> Color y vista
             </h2>
-            <p className={styles.help}>Colores de referencia; sujetos a confirmación comercial.</p>
-            <div className={styles.swatches}>
-              {product.colors.map((entry) => (
+            <p className={styles.help}>
+              Los colores son ilustrativos. La disponibilidad y el tono final se confirman al
+              cotizar.
+            </p>
+            <div className={styles.colorQuick}>
+              {studioColors.slice(0, 2).map((entry) => (
                 <button
                   key={entry.name}
                   type="button"
-                  title={entry.name}
                   aria-label={entry.name}
                   aria-pressed={design.color === entry.name}
-                  onClick={() =>
-                    changeDesign((current) => {
-                      const wasDark = ['Negro', 'Verde bosque'].includes(current.color);
-                      const isDark = ['Negro', 'Verde bosque'].includes(entry.name);
-                      const adapt = (items: Artwork[]) =>
-                        items.map((layer) =>
-                          layer.kind === 'text' &&
-                          wasDark !== isDark &&
-                          layer.color === (wasDark ? '#F9F7F0' : '#294D3A')
-                            ? { ...layer, color: isDark ? '#F9F7F0' : '#294D3A' }
-                            : layer,
-                        );
-                      return {
-                        ...current,
-                        color: entry.name,
-                        layers: {
-                          frente: adapt(current.layers.frente),
-                          espalda: adapt(current.layers.espalda),
-                        },
-                      };
-                    })
-                  }
+                  onClick={() => selectColor(entry.name)}
                   style={{ '--swatch': entry.value } as React.CSSProperties}
                 >
                   <span />
                 </button>
               ))}
+              <button
+                type="button"
+                className={styles.paletteToggle}
+                aria-expanded={paletteOpen}
+                onClick={() => setPaletteOpen((open) => !open)}
+              >
+                {paletteOpen ? 'Cerrar paleta' : 'Explorar colores'}{' '}
+                <span aria-hidden="true">⌄</span>
+              </button>
             </div>
-            <p className={styles.selectedColor}>{design.color}</p>
+            <p className={styles.selectedColor}>
+              {colorName(design.color)} · {color}
+            </p>
+            {paletteOpen && (
+              <div className={styles.palettePanel}>
+                <p className={styles.subhead}>Colores populares</p>
+                <div className={styles.swatches}>
+                  {product.colors.map((entry) => (
+                    <button
+                      key={entry.name}
+                      type="button"
+                      title={`${entry.name} ${entry.value}`}
+                      aria-label={`${entry.name} ${entry.value}`}
+                      aria-pressed={design.color === entry.name}
+                      onClick={() => selectColor(entry.name)}
+                      style={{ '--swatch': entry.value } as React.CSSProperties}
+                    >
+                      <span />
+                    </button>
+                  ))}
+                </div>
+                <p className={styles.subhead}>Tu propio tono</p>
+                <div className={styles.customColor}>
+                  <label>
+                    Elegir color
+                    <input
+                      type="color"
+                      value={color}
+                      onChange={(event) => selectColor(event.target.value.toUpperCase())}
+                    />
+                  </label>
+                  <label>
+                    Código HEX
+                    <input
+                      type="text"
+                      value={hexInput || color}
+                      maxLength={7}
+                      onChange={(event) => setHexInput(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          if (/^#[0-9a-fA-F]{6}$/.test(hexInput))
+                            selectColor(hexInput.toUpperCase());
+                          else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (/^#[0-9a-fA-F]{6}$/.test(hexInput)) selectColor(hexInput.toUpperCase());
+                      else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
+                    }}
+                  >
+                    Aplicar
+                  </button>
+                </div>
+                {hexError && (
+                  <p role="alert" className={styles.warning}>
+                    {hexError}
+                  </p>
+                )}
+              </div>
+            )}
             {product.sides.length > 1 && (
               <div className={styles.segment}>
                 {product.sides.map((side) => (
@@ -517,27 +642,88 @@ export function Studio() {
                         onChange={(event) => changeLayer({ text: event.target.value })}
                       />
                     </label>
-                    <div className={styles.fieldPair}>
-                      <label>
-                        Tipografía
-                        <select
-                          value={selected.font}
-                          onChange={(event) => changeLayer({ font: event.target.value as FontId })}
+                    <p className={styles.subhead}>
+                      Tipografía · {fontOptions.find((option) => option.id === selected.font)?.name}
+                    </p>
+                    <div className={styles.fontCategories}>
+                      {['Elegantes', 'Modernas', 'Impactantes', 'Manuscritas'].map((category) => (
+                        <button
+                          key={category}
+                          type="button"
+                          aria-pressed={fontCategory === category}
+                          onClick={() => setFontCategory(category)}
                         >
-                          {fontOptions.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                    <div className={styles.fontChoices}>
+                      {fontOptions
+                        .filter((option) => option.category === fontCategory)
+                        .map((option) => (
+                          <button
+                            key={option.id}
+                            type="button"
+                            aria-label={`Tipografía ${option.name}`}
+                            aria-pressed={selected.font === option.id}
+                            onClick={() =>
+                              changeLayer({
+                                font: option.id,
+                                weight: fontSupportsBold(option.id)
+                                  ? (selected.weight ?? (option.id === 'bold' ? 700 : 400))
+                                  : 400,
+                              })
+                            }
+                          >
+                            <span
+                              style={{
+                                fontFamily: `"${option.family}", serif`,
+                                fontWeight: option.weight ?? '400',
+                              }}
+                            >
+                              Aa Genhora
+                            </span>
+                            <small>{option.name}</small>
+                          </button>
+                        ))}
+                    </div>
+                    <label>
+                      Color del texto
+                      <input
+                        type="color"
+                        value={selected.color}
+                        onChange={(event) => changeLayer({ color: event.target.value })}
+                      />
+                    </label>
+                    <div className={styles.fieldPair}>
+                      {fontSupportsBold(selected.font) && (
+                        <label>
+                          Grosor
+                          <select
+                            value={selected.weight ?? (selected.font === 'bold' ? 700 : 400)}
+                            onChange={(event) =>
+                              changeLayer({ weight: Number(event.target.value) as 400 | 700 })
+                            }
+                          >
+                            <option value="400">Regular</option>
+                            <option value="700">Negrita</option>
+                          </select>
+                        </label>
+                      )}
                       <label>
-                        Color
-                        <input
-                          type="color"
-                          value={selected.color}
-                          onChange={(event) => changeLayer({ color: event.target.value })}
-                        />
+                        Alineación
+                        <select
+                          value={selected.align ?? 'center'}
+                          onChange={(event) =>
+                            changeLayer({
+                              align: event.target.value as 'left' | 'center' | 'right',
+                            })
+                          }
+                        >
+                          <option value="left">Izquierda</option>
+                          <option value="center">Centro</option>
+                          <option value="right">Derecha</option>
+                        </select>
                       </label>
                     </div>
                   </>
@@ -576,9 +762,9 @@ export function Studio() {
                     Tamaño <span>{Math.round(selected.scale * 100)}%</span>
                     <input
                       type="range"
-                      min="0.25"
+                      min="0.02"
                       max="2"
-                      step="0.05"
+                      step="0.01"
                       value={selected.scale}
                       onChange={(event) => changeLayer({ scale: Number(event.target.value) })}
                     />
@@ -605,7 +791,11 @@ export function Studio() {
                         x: clamp(selected.x + 0.08, 0.02, 0.98),
                         y: clamp(selected.y + 0.08, 0.02, 0.98),
                       };
-                      changeLayers((current) => [...current, clone]);
+                      const ctx = canvasRef.current?.getContext('2d');
+                      changeLayers((current) => [
+                        ...current,
+                        ctx ? constrainLayer(ctx, clone, product, design.side) : clone,
+                      ]);
                       setSelectedId(clone.id);
                     }}
                   >
@@ -618,7 +808,8 @@ export function Studio() {
                         const index = current.findIndex((layer) => layer.id === selected.id);
                         if (index < 0 || index === current.length - 1) return current;
                         const next = [...current];
-                        [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                        const [layer] = next.splice(index, 1);
+                        next.push(layer);
                         return next;
                       })
                     }

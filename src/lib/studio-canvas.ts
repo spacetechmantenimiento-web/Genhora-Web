@@ -1,6 +1,15 @@
-import type { Artwork, Product, Side } from './studio';
+import {
+  fontOptions,
+  fontSupportsBold,
+  printArea,
+  STUDIO_CANVAS_SIZE,
+  type Artwork,
+  type FontId,
+  type Product,
+  type Side,
+} from './studio';
 
-export const CANVAS_SIZE = 800;
+export const CANVAS_SIZE = STUDIO_CANVAS_SIZE;
 export type Scene = {
   product: Product;
   color: string;
@@ -15,126 +24,301 @@ function path(ctx: CanvasRenderingContext2D, points: number[][], color: string) 
   ctx.beginPath();
   points.forEach(([x, y], index) => (index ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.closePath();
-  ctx.fillStyle = color;
+  ctx.fillStyle = fabricFill(ctx, color);
   ctx.fill();
   ctx.strokeStyle = 'rgba(35,53,43,.24)';
   ctx.lineWidth = 2;
   ctx.stroke();
 }
 
+function fabricFill(ctx: CanvasRenderingContext2D, color: string) {
+  const gradient = ctx.createLinearGradient(190, 190, 600, 680);
+  gradient.addColorStop(0, color);
+  gradient.addColorStop(0.24, shade(color, 0.08));
+  gradient.addColorStop(0.52, color);
+  gradient.addColorStop(0.88, shade(color, -0.09));
+  gradient.addColorStop(1, shade(color, -0.13));
+  return gradient;
+}
+
+function shade(hex: string, amount: number) {
+  const channel = (offset: number) => {
+    const value = parseInt(hex.slice(offset, offset + 2), 16);
+    return Math.round(value + (amount > 0 ? 255 - value : value) * amount)
+      .toString(16)
+      .padStart(2, '0');
+  };
+  return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
+
+function garmentBody(ctx: CanvasRenderingContext2D, color: string, hoodie: boolean) {
+  ctx.beginPath();
+  if (hoodie) {
+    ctx.moveTo(293, 212);
+    ctx.bezierCurveTo(270, 215, 248, 221, 231, 239);
+    ctx.bezierCurveTo(185, 291, 146, 375, 131, 489);
+    ctx.quadraticCurveTo(129, 504, 141, 511);
+    ctx.lineTo(177, 528);
+    ctx.quadraticCurveTo(190, 533, 197, 520);
+    ctx.bezierCurveTo(222, 466, 240, 403, 258, 359);
+    ctx.bezierCurveTo(254, 456, 252, 573, 252, 668);
+    ctx.quadraticCurveTo(253, 680, 266, 680);
+    ctx.lineTo(534, 680);
+    ctx.quadraticCurveTo(547, 680, 548, 668);
+    ctx.bezierCurveTo(548, 573, 546, 456, 542, 359);
+    ctx.bezierCurveTo(560, 403, 578, 466, 603, 520);
+    ctx.quadraticCurveTo(610, 533, 623, 528);
+    ctx.lineTo(659, 511);
+    ctx.quadraticCurveTo(671, 504, 669, 489);
+    ctx.bezierCurveTo(654, 375, 615, 291, 569, 239);
+    ctx.bezierCurveTo(552, 221, 530, 215, 507, 212);
+    ctx.lineTo(475, 232);
+    ctx.lineTo(325, 232);
+  } else {
+    ctx.moveTo(300, 180);
+    ctx.bezierCurveTo(271, 184, 250, 198, 239, 209);
+    ctx.lineTo(149, 277);
+    ctx.quadraticCurveTo(140, 285, 147, 296);
+    ctx.lineTo(198, 369);
+    ctx.quadraticCurveTo(206, 380, 217, 373);
+    ctx.lineTo(264, 336);
+    ctx.bezierCurveTo(260, 436, 258, 558, 259, 657);
+    ctx.quadraticCurveTo(259, 668, 270, 668);
+    ctx.lineTo(530, 668);
+    ctx.quadraticCurveTo(541, 668, 541, 657);
+    ctx.bezierCurveTo(542, 558, 540, 436, 536, 336);
+    ctx.lineTo(583, 373);
+    ctx.quadraticCurveTo(594, 380, 602, 369);
+    ctx.lineTo(653, 296);
+    ctx.quadraticCurveTo(660, 285, 651, 277);
+    ctx.lineTo(561, 209);
+    ctx.bezierCurveTo(550, 198, 529, 184, 500, 180);
+    ctx.lineTo(470, 197);
+    ctx.lineTo(330, 197);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fabricFill(ctx, color);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(35,53,43,.22)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
 function drawProduct(ctx: CanvasRenderingContext2D, product: Product, color: string, side: Side) {
   ctx.save();
-  ctx.shadowColor = 'rgba(37,44,34,.14)';
-  ctx.shadowBlur = 32;
-  ctx.shadowOffsetY = 21;
+  const seam = 'rgba(34,42,35,.25)';
+  const fold = 'rgba(34,42,35,.11)';
+  ctx.shadowColor = 'rgba(37,44,34,.18)';
+  ctx.shadowBlur = 28;
+  ctx.shadowOffsetY = 17;
   if (product.id === 'tote') {
+    // The straps sit behind the bag and are stitched into its upper edge.
+    ctx.strokeStyle = seam;
+    ctx.lineWidth = 35;
+    ctx.beginPath();
+    ctx.moveTo(305, 320);
+    ctx.bezierCurveTo(298, 135, 501, 135, 495, 320);
+    ctx.stroke();
     ctx.strokeStyle = color;
-    ctx.lineWidth = 27;
-    ctx.beginPath();
-    ctx.moveTo(307, 300);
-    ctx.bezierCurveTo(305, 110, 495, 110, 493, 300);
+    ctx.lineWidth = 30;
     ctx.stroke();
     path(
       ctx,
       [
-        [232, 287],
-        [568, 287],
-        [550, 670],
-        [250, 670],
+        [230, 294],
+        [570, 294],
+        [550, 674],
+        [250, 674],
       ],
       color,
     );
     ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(45,55,44,.13)';
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = seam;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(263, 310);
-    ctx.lineTo(537, 310);
+    ctx.moveTo(236, 319);
+    ctx.lineTo(564, 319);
+    ctx.moveTo(274, 326);
+    ctx.lineTo(260, 658);
+    ctx.moveTo(526, 326);
+    ctx.lineTo(540, 658);
     ctx.stroke();
+    ctx.strokeStyle = fold;
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(252, 654);
+    ctx.lineTo(548, 654);
+    ctx.stroke();
+    ctx.fillStyle = seam;
+    for (const x of [305, 495]) {
+      ctx.beginPath();
+      ctx.arc(x, 326, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if (side === 'espalda') {
+      ctx.strokeStyle = fold;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(241, 332);
+      ctx.quadraticCurveTo(400, 344, 559, 332);
+      ctx.stroke();
+    }
   } else if (product.id === 'playera') {
-    path(
-      ctx,
-      [
-        [300, 177],
-        [245, 197],
-        [149, 285],
-        [214, 370],
-        [267, 332],
-        [260, 665],
-        [540, 665],
-        [533, 332],
-        [586, 370],
-        [651, 285],
-        [555, 197],
-        [500, 177],
-        [470, 195],
-        [330, 195],
-      ],
-      color,
-    );
+    garmentBody(ctx, color, false);
     ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = seam;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.ellipse(400, 193, 72, 32, 0, 0, Math.PI);
-    ctx.strokeStyle = 'rgba(43,52,43,.34)';
-    ctx.lineWidth = 3;
+    if (side === 'frente') {
+      ctx.moveTo(328, 191);
+      ctx.bezierCurveTo(336, 255, 464, 255, 472, 191);
+    } else {
+      ctx.moveTo(328, 192);
+      ctx.bezierCurveTo(345, 217, 455, 217, 472, 192);
+    }
     ctx.stroke();
-  } else {
-    path(
-      ctx,
-      [
-        [292, 200],
-        [240, 222],
-        [145, 335],
-        [203, 397],
-        [258, 354],
-        [255, 679],
-        [545, 679],
-        [542, 354],
-        [597, 397],
-        [655, 335],
-        [560, 222],
-        [508, 200],
-        [474, 223],
-        [326, 223],
-      ],
-      color,
-    );
-    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = fold;
     ctx.beginPath();
-    ctx.moveTo(328, 219);
-    ctx.bezierCurveTo(305, 110, 495, 110, 472, 219);
-    ctx.bezierCurveTo(455, 245, 345, 245, 328, 219);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(43,52,43,.28)';
+    ctx.moveTo(150, 297);
+    ctx.lineTo(201, 364);
+    ctx.moveTo(650, 297);
+    ctx.lineTo(599, 364);
+    ctx.moveTo(266, 651);
+    ctx.lineTo(534, 651);
+    ctx.moveTo(267, 332);
+    ctx.quadraticCurveTo(278, 252, 300, 180);
+    ctx.moveTo(533, 332);
+    ctx.quadraticCurveTo(522, 252, 500, 180);
+    ctx.stroke();
+    if (side === 'espalda') {
+      ctx.beginPath();
+      ctx.moveTo(354, 222);
+      ctx.quadraticCurveTo(400, 237, 446, 222);
+      ctx.stroke();
+    }
+  } else {
+    garmentBody(ctx, color, true);
+    ctx.shadowColor = 'transparent';
+    // Hood silhouette and opening are different on the two physical sides.
+    ctx.fillStyle = fabricFill(ctx, color);
+    ctx.strokeStyle = seam;
     ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(334, 244);
+    ctx.bezierCurveTo(309, 202, 310, 151, 352, 128);
+    ctx.bezierCurveTo(392, 106, 447, 122, 471, 157);
+    ctx.bezierCurveTo(492, 190, 482, 222, 465, 245);
+    ctx.bezierCurveTo(
+      446,
+      side === 'frente' ? 270 : 250,
+      354,
+      side === 'frente' ? 270 : 250,
+      334,
+      244,
+    );
+    ctx.fill();
     ctx.stroke();
     if (side === 'frente') {
-      ctx.strokeStyle = 'rgba(43,52,43,.22)';
+      ctx.fillStyle = shade(color, -0.12);
+      ctx.beginPath();
+      ctx.moveTo(350, 229);
+      ctx.bezierCurveTo(367, 254, 434, 254, 451, 229);
+      ctx.bezierCurveTo(430, 263, 370, 263, 350, 229);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(347, 236);
+      ctx.quadraticCurveTo(400, 276, 453, 236);
+      ctx.stroke();
+      ctx.strokeStyle = seam;
       ctx.lineWidth = 2;
-      ctx.strokeRect(308, 552, 184, 79);
+      ctx.beginPath();
+      ctx.moveTo(379, 261);
+      ctx.lineTo(375, 318);
+      ctx.moveTo(421, 261);
+      ctx.lineTo(425, 318);
+      ctx.stroke();
+      ctx.strokeStyle = fold;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(315, 544);
+      ctx.lineTo(485, 544);
+      ctx.lineTo(509, 628);
+      ctx.lineTo(291, 628);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(315, 544);
+      ctx.lineTo(336, 592);
+      ctx.moveTo(485, 544);
+      ctx.lineTo(464, 592);
+      ctx.stroke();
+    } else {
+      ctx.strokeStyle = fold;
+      ctx.beginPath();
+      ctx.moveTo(338, 245);
+      ctx.quadraticCurveTo(400, 285, 462, 245);
+      ctx.stroke();
     }
+    ctx.strokeStyle = seam;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(263, 641);
+    ctx.lineTo(537, 641);
+    ctx.moveTo(260, 655);
+    ctx.lineTo(540, 655);
+    ctx.moveTo(137, 495);
+    ctx.lineTo(191, 518);
+    ctx.moveTo(141, 505);
+    ctx.lineTo(185, 525);
+    ctx.moveTo(663, 495);
+    ctx.lineTo(609, 518);
+    ctx.moveTo(659, 505);
+    ctx.lineTo(615, 525);
+    ctx.stroke();
   }
   ctx.restore();
 }
 
-function fontFamily(font: string) {
-  const html = getComputedStyle(document.documentElement);
-  const sans = html.getPropertyValue('--font-manrope').trim() || 'Arial';
-  const serif = html.getPropertyValue('--font-cormorant').trim() || 'Georgia';
-  if (font === 'sans') return sans;
-  if (font === 'bold') return sans;
-  if (font === 'script') return 'cursive';
-  return serif;
+const fontLoads = new Map<string, Promise<void>>();
+export function ensureStudioFont(id: FontId, requestedWeight?: 400 | 700) {
+  const option = fontOptions.find((item) => item.id === id) ?? fontOptions[0];
+  const weight = requestedWeight ?? (id === 'bold' ? 700 : 400);
+  const variable = id === 'sans' || id === 'bold' || id === 'serif';
+  const actualWeight = fontSupportsBold(id) ? weight : 400;
+  const key = variable ? option.family : `${id}-${actualWeight}`;
+  const existing = fontLoads.get(key);
+  if (existing) return existing;
+  const file = option.file
+    ? `/fonts/studio/${option.file}${actualWeight === 700 ? '-700' : ''}.woff2`
+    : option.id === 'serif'
+      ? '/fonts/cormorant-garamond-latin-variable.woff2'
+      : '/fonts/manrope-latin-variable.woff2';
+  const face = new FontFace(option.family, `url(${file})`, {
+    weight: variable ? '400 700' : String(actualWeight),
+  });
+  const loading = face.load().then(() => {
+    document.fonts.add(face);
+  });
+  fontLoads.set(key, loading);
+  return loading;
+}
+function fontFamily(font: FontId) {
+  const option = fontOptions.find((item) => item.id === font) ?? fontOptions[0];
+  return `"${option.family}", ${option.category === 'Elegantes' ? 'serif' : 'sans-serif'}`;
 }
 
-export function layerDimensions(ctx: CanvasRenderingContext2D, layer: Artwork, product: Product) {
+export function layerDimensions(
+  ctx: CanvasRenderingContext2D,
+  layer: Artwork,
+  product: Product,
+  side: Side,
+) {
   if (layer.kind === 'image') {
-    const width = product.area.width * 0.6 * layer.scale;
+    const width = printArea(product, side).width * 0.6 * layer.scale;
     return { width, height: (width * layer.pixelHeight) / layer.pixelWidth };
   }
   const size = 42 * layer.scale;
-  ctx.font = `${layer.font === 'bold' ? '700' : '400'} ${size}px ${fontFamily(layer.font)}`;
+  ctx.font = `${layer.weight ?? (layer.font === 'bold' ? 700 : 400)} ${size}px ${fontFamily(layer.font)}`;
   const lines = layer.text.split('\n').slice(0, 3);
   return {
     width: Math.max(1, ...lines.map((line) => ctx.measureText(line).width)),
@@ -144,7 +328,7 @@ export function layerDimensions(ctx: CanvasRenderingContext2D, layer: Artwork, p
 
 export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, clean = false) {
   const { product, color, side, layers, images } = scene;
-  const area = product.area;
+  const area = printArea(product, side);
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
   ctx.fillStyle = '#EEECE4';
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -160,7 +344,7 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, clean = f
   for (const layer of layers) {
     const x = area.x + area.width * layer.x;
     const y = area.y + area.height * layer.y;
-    const { width, height } = layerDimensions(ctx, layer, product);
+    const { width, height } = layerDimensions(ctx, layer, product, side);
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate((layer.angle * Math.PI) / 180);
@@ -171,12 +355,13 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, clean = f
     } else {
       const size = 42 * layer.scale;
       ctx.fillStyle = layer.color;
-      ctx.font = `${layer.font === 'bold' ? '700' : '400'} ${size}px ${fontFamily(layer.font)}`;
-      ctx.textAlign = 'center';
+      ctx.font = `${layer.weight ?? (layer.font === 'bold' ? 700 : 400)} ${size}px ${fontFamily(layer.font)}`;
+      ctx.textAlign = layer.align ?? 'center';
       ctx.textBaseline = 'middle';
       const lines = layer.text.split('\n').slice(0, 3);
+      const textX = layer.align === 'left' ? -width / 2 : layer.align === 'right' ? width / 2 : 0;
       lines.forEach((line, index) =>
-        ctx.fillText(line, 0, (index - (lines.length - 1) / 2) * size * 1.08),
+        ctx.fillText(line, textX, (index - (lines.length - 1) / 2) * size * 1.08),
       );
     }
     if (!clean && scene.selectedId === layer.id) {
@@ -200,11 +385,11 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, clean = f
 }
 
 export function hitLayer(ctx: CanvasRenderingContext2D, scene: Scene, x: number, y: number) {
-  const { area } = scene.product;
+  const area = printArea(scene.product, scene.side);
   for (const layer of [...scene.layers].reverse()) {
     const centerX = area.x + area.width * layer.x;
     const centerY = area.y + area.height * layer.y;
-    const { width, height } = layerDimensions(ctx, layer, scene.product);
+    const { width, height } = layerDimensions(ctx, layer, scene.product, scene.side);
     const angle = (-layer.angle * Math.PI) / 180;
     const dx = x - centerX,
       dy = y - centerY;
@@ -215,9 +400,14 @@ export function hitLayer(ctx: CanvasRenderingContext2D, scene: Scene, x: number,
   return null;
 }
 
-export function layerOutside(ctx: CanvasRenderingContext2D, layer: Artwork, product: Product) {
-  const { width, height } = layerDimensions(ctx, layer, product);
-  const a = product.area;
+export function layerOutside(
+  ctx: CanvasRenderingContext2D,
+  layer: Artwork,
+  product: Product,
+  side: Side,
+) {
+  const { width, height } = layerDimensions(ctx, layer, product, side);
+  const a = printArea(product, side);
   const rotatedWidth =
     Math.abs(width * Math.cos((layer.angle * Math.PI) / 180)) +
     Math.abs(height * Math.sin((layer.angle * Math.PI) / 180));
@@ -230,4 +420,37 @@ export function layerOutside(ctx: CanvasRenderingContext2D, layer: Artwork, prod
     layer.y * a.height - rotatedHeight / 2 < 0 ||
     layer.y * a.height + rotatedHeight / 2 > a.height
   );
+}
+
+export function constrainLayer(
+  ctx: CanvasRenderingContext2D,
+  layer: Artwork,
+  product: Product,
+  side: Side,
+): Artwork {
+  const area = printArea(product, side);
+  const dimensions = layerDimensions(ctx, layer, product, side);
+  const radians = (layer.angle * Math.PI) / 180;
+  const rotatedWidth =
+    Math.abs(dimensions.width * Math.cos(radians)) +
+    Math.abs(dimensions.height * Math.sin(radians));
+  const rotatedHeight =
+    Math.abs(dimensions.width * Math.sin(radians)) +
+    Math.abs(dimensions.height * Math.cos(radians));
+  const scaleFactor = Math.min(
+    1,
+    (area.width - 12) / rotatedWidth,
+    (area.height - 12) / rotatedHeight,
+  );
+  const fitted =
+    scaleFactor < 1 ? { ...layer, scale: Math.max(0.02, layer.scale * scaleFactor) } : layer;
+  const { width, height } = layerDimensions(ctx, fitted, product, side);
+  const halfX =
+    (Math.abs(width * Math.cos(radians)) + Math.abs(height * Math.sin(radians))) / (2 * area.width);
+  const halfY =
+    (Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians))) /
+    (2 * area.height);
+  const limit = (value: number, half: number) =>
+    half >= 0.5 ? 0.5 : Math.min(1 - half, Math.max(half, value));
+  return { ...fitted, x: limit(fitted.x, halfX), y: limit(fitted.y, halfY) };
 }

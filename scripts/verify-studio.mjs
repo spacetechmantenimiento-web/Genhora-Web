@@ -9,7 +9,7 @@ const browser = await chromium.launch({
   headless: true,
 });
 const context = await browser.newContext({
-  baseURL: 'http://127.0.0.1:3005',
+  baseURL: process.env.STUDIO_URL ?? 'http://127.0.0.1:3005',
   acceptDownloads: true,
 });
 const page = await context.newPage();
@@ -28,11 +28,11 @@ try {
   )
     throw new Error('Keyboard skip link unavailable');
   await page.getByRole('button', { name: '+ Agregar texto' }).click();
-  await page.getByRole('textbox', { name: 'Texto' }).fill('Ana');
+  await page.getByRole('textbox', { name: 'Texto', exact: true }).fill('Ana');
   await page.getByRole('button', { name: 'Negro', exact: true }).first().click();
   await page.getByRole('button', { name: 'Espalda', exact: true }).click();
   await page.getByRole('button', { name: '+ Agregar texto' }).click();
-  await page.getByRole('textbox', { name: 'Texto' }).fill('Atrás');
+  await page.getByRole('textbox', { name: 'Texto', exact: true }).fill('Atrás');
   await page.getByRole('button', { name: 'Frente', exact: true }).click();
   if (!(await page.getByRole('button', { name: 'Ana' }).count()))
     throw new Error('Front artwork lost');
