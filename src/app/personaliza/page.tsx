@@ -1,16 +1,10 @@
 import type { Metadata } from 'next';
-import { PersonalizeSection } from '@/components/sections';
-import { ClosingCTA } from '@/components/ui';
+import { Studio } from '@/components/studio/studio';
 export const metadata: Metadata = {
-  title: 'Tu idea, tus reglas',
+  title: 'Estudio de personalización',
   description:
-    'Conoce cómo será el personalizador de GENHORA. Mientras llega, prepara tu idea para una cotización.',
+    'Crea una propuesta visual de playera, sudadera o tote bag personalizada y solicita una cotización en GENHORA.',
 };
 export default function Personaliza() {
-  return (
-    <>
-      <PersonalizeSection full />
-      <ClosingCTA />
-    </>
-  );
+  return <Studio />;
 }

@@ -4,7 +4,7 @@ export const siteConfig = {
   name: 'GENHORA',
   tagline: 'Es hora de crear.',
   country: 'México',
-  whatsappNumber: '', // International digits only; e.g. country code + subscriber number. No invented fallback.
+  whatsappNumber: '525655745468', // Official GENHORA number, supplied by the owner.
   defaultMessage: 'Hola, GENHORA. Me gustaría dar vida a una idea.',
   cta: { quote: 'Cotiza tu idea', create: 'Empieza a crear' },
   email: '',
