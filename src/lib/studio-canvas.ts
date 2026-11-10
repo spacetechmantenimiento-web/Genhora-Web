@@ -1,3 +1,4 @@
+import { drawHoodie } from './studio-hoodie';
 import {
   fontOptions,
   fontSupportsBold,
@@ -17,6 +18,7 @@ export type Scene = {
   layers: Artwork[];
   selectedId?: string;
   guides?: boolean;
+  alignGuides?: boolean;
   images: Map<string, HTMLImageElement>;
 };
 
@@ -51,51 +53,28 @@ function shade(hex: string, amount: number) {
   return `#${channel(1)}${channel(3)}${channel(5)}`;
 }
 
-function garmentBody(ctx: CanvasRenderingContext2D, color: string, hoodie: boolean) {
+function drawShirtBody(ctx: CanvasRenderingContext2D, color: string) {
   ctx.beginPath();
-  if (hoodie) {
-    ctx.moveTo(293, 212);
-    ctx.bezierCurveTo(270, 215, 248, 221, 231, 239);
-    ctx.bezierCurveTo(185, 291, 146, 375, 131, 489);
-    ctx.quadraticCurveTo(129, 504, 141, 511);
-    ctx.lineTo(177, 528);
-    ctx.quadraticCurveTo(190, 533, 197, 520);
-    ctx.bezierCurveTo(222, 466, 240, 403, 258, 359);
-    ctx.bezierCurveTo(254, 456, 252, 573, 252, 668);
-    ctx.quadraticCurveTo(253, 680, 266, 680);
-    ctx.lineTo(534, 680);
-    ctx.quadraticCurveTo(547, 680, 548, 668);
-    ctx.bezierCurveTo(548, 573, 546, 456, 542, 359);
-    ctx.bezierCurveTo(560, 403, 578, 466, 603, 520);
-    ctx.quadraticCurveTo(610, 533, 623, 528);
-    ctx.lineTo(659, 511);
-    ctx.quadraticCurveTo(671, 504, 669, 489);
-    ctx.bezierCurveTo(654, 375, 615, 291, 569, 239);
-    ctx.bezierCurveTo(552, 221, 530, 215, 507, 212);
-    ctx.lineTo(475, 232);
-    ctx.lineTo(325, 232);
-  } else {
-    ctx.moveTo(300, 180);
-    ctx.bezierCurveTo(271, 184, 250, 198, 239, 209);
-    ctx.lineTo(149, 277);
-    ctx.quadraticCurveTo(140, 285, 147, 296);
-    ctx.lineTo(198, 369);
-    ctx.quadraticCurveTo(206, 380, 217, 373);
-    ctx.lineTo(264, 336);
-    ctx.bezierCurveTo(260, 436, 258, 558, 259, 657);
-    ctx.quadraticCurveTo(259, 668, 270, 668);
-    ctx.lineTo(530, 668);
-    ctx.quadraticCurveTo(541, 668, 541, 657);
-    ctx.bezierCurveTo(542, 558, 540, 436, 536, 336);
-    ctx.lineTo(583, 373);
-    ctx.quadraticCurveTo(594, 380, 602, 369);
-    ctx.lineTo(653, 296);
-    ctx.quadraticCurveTo(660, 285, 651, 277);
-    ctx.lineTo(561, 209);
-    ctx.bezierCurveTo(550, 198, 529, 184, 500, 180);
-    ctx.lineTo(470, 197);
-    ctx.lineTo(330, 197);
-  }
+  ctx.moveTo(300, 180);
+  ctx.bezierCurveTo(271, 184, 250, 198, 239, 209);
+  ctx.lineTo(149, 277);
+  ctx.quadraticCurveTo(140, 285, 147, 296);
+  ctx.lineTo(198, 369);
+  ctx.quadraticCurveTo(206, 380, 217, 373);
+  ctx.lineTo(264, 336);
+  ctx.bezierCurveTo(260, 436, 258, 558, 259, 657);
+  ctx.quadraticCurveTo(259, 668, 270, 668);
+  ctx.lineTo(530, 668);
+  ctx.quadraticCurveTo(541, 668, 541, 657);
+  ctx.bezierCurveTo(542, 558, 540, 436, 536, 336);
+  ctx.lineTo(583, 373);
+  ctx.quadraticCurveTo(594, 380, 602, 369);
+  ctx.lineTo(653, 296);
+  ctx.quadraticCurveTo(660, 285, 651, 277);
+  ctx.lineTo(561, 209);
+  ctx.bezierCurveTo(550, 198, 529, 184, 500, 180);
+  ctx.lineTo(470, 197);
+  ctx.lineTo(330, 197);
   ctx.closePath();
   ctx.fillStyle = fabricFill(ctx, color);
   ctx.fill();
@@ -164,7 +143,7 @@ function drawProduct(ctx: CanvasRenderingContext2D, product: Product, color: str
       ctx.stroke();
     }
   } else if (product.id === 'playera') {
-    garmentBody(ctx, color, false);
+    drawShirtBody(ctx, color);
     ctx.shadowColor = 'transparent';
     ctx.strokeStyle = seam;
     ctx.lineWidth = 2;
@@ -197,84 +176,8 @@ function drawProduct(ctx: CanvasRenderingContext2D, product: Product, color: str
       ctx.stroke();
     }
   } else {
-    garmentBody(ctx, color, true);
     ctx.shadowColor = 'transparent';
-    // Hood silhouette and opening are different on the two physical sides.
-    ctx.fillStyle = fabricFill(ctx, color);
-    ctx.strokeStyle = seam;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(334, 244);
-    ctx.bezierCurveTo(309, 202, 310, 151, 352, 128);
-    ctx.bezierCurveTo(392, 106, 447, 122, 471, 157);
-    ctx.bezierCurveTo(492, 190, 482, 222, 465, 245);
-    ctx.bezierCurveTo(
-      446,
-      side === 'frente' ? 270 : 250,
-      354,
-      side === 'frente' ? 270 : 250,
-      334,
-      244,
-    );
-    ctx.fill();
-    ctx.stroke();
-    if (side === 'frente') {
-      ctx.fillStyle = shade(color, -0.12);
-      ctx.beginPath();
-      ctx.moveTo(350, 229);
-      ctx.bezierCurveTo(367, 254, 434, 254, 451, 229);
-      ctx.bezierCurveTo(430, 263, 370, 263, 350, 229);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(347, 236);
-      ctx.quadraticCurveTo(400, 276, 453, 236);
-      ctx.stroke();
-      ctx.strokeStyle = seam;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(379, 261);
-      ctx.lineTo(375, 318);
-      ctx.moveTo(421, 261);
-      ctx.lineTo(425, 318);
-      ctx.stroke();
-      ctx.strokeStyle = fold;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(315, 544);
-      ctx.lineTo(485, 544);
-      ctx.lineTo(509, 628);
-      ctx.lineTo(291, 628);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(315, 544);
-      ctx.lineTo(336, 592);
-      ctx.moveTo(485, 544);
-      ctx.lineTo(464, 592);
-      ctx.stroke();
-    } else {
-      ctx.strokeStyle = fold;
-      ctx.beginPath();
-      ctx.moveTo(338, 245);
-      ctx.quadraticCurveTo(400, 285, 462, 245);
-      ctx.stroke();
-    }
-    ctx.strokeStyle = seam;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(263, 641);
-    ctx.lineTo(537, 641);
-    ctx.moveTo(260, 655);
-    ctx.lineTo(540, 655);
-    ctx.moveTo(137, 495);
-    ctx.lineTo(191, 518);
-    ctx.moveTo(141, 505);
-    ctx.lineTo(185, 525);
-    ctx.moveTo(663, 495);
-    ctx.lineTo(609, 518);
-    ctx.moveTo(659, 505);
-    ctx.lineTo(615, 525);
-    ctx.stroke();
+    drawHoodie(ctx, color, side);
   }
   ctx.restore();
 }
@@ -296,9 +199,15 @@ export function ensureStudioFont(id: FontId, requestedWeight?: 400 | 700) {
   const face = new FontFace(option.family, `url(${file})`, {
     weight: variable ? '400 700' : String(actualWeight),
   });
-  const loading = face.load().then(() => {
-    document.fonts.add(face);
-  });
+  const loading = face.load().then(
+    () => {
+      document.fonts.add(face);
+    },
+    (error) => {
+      fontLoads.delete(key);
+      throw error;
+    },
+  );
   fontLoads.set(key, loading);
   return loading;
 }
@@ -374,13 +283,32 @@ export function drawScene(ctx: CanvasRenderingContext2D, scene: Scene, clean = f
   }
   ctx.restore();
   if (!clean && scene.guides) {
-    ctx.strokeStyle = 'rgba(41,77,58,.68)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 6]);
+    ctx.strokeStyle = 'rgba(41,77,58,.42)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([7, 7]);
     ctx.strokeRect(area.x, area.y, area.width, area.height);
-    ctx.setLineDash([3, 5]);
+    ctx.setLineDash([3, 6]);
     ctx.strokeRect(area.x + 12, area.y + 12, area.width - 24, area.height - 24);
     ctx.setLineDash([]);
+  }
+  if (!clean && scene.alignGuides && scene.selectedId) {
+    const active = layers.find((layer) => layer.id === scene.selectedId);
+    if (active) {
+      ctx.strokeStyle = 'rgba(41,77,58,.55)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 7]);
+      ctx.beginPath();
+      if (Math.abs(active.x - 0.5) < 0.025) {
+        ctx.moveTo(area.x + area.width / 2, area.y);
+        ctx.lineTo(area.x + area.width / 2, area.y + area.height);
+      }
+      if (Math.abs(active.y - 0.5) < 0.025) {
+        ctx.moveTo(area.x, area.y + area.height / 2);
+        ctx.lineTo(area.x + area.width, area.y + area.height / 2);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
 }
 
@@ -453,4 +381,21 @@ export function constrainLayer(
   const limit = (value: number, half: number) =>
     half >= 0.5 ? 0.5 : Math.min(1 - half, Math.max(half, value));
   return { ...fitted, x: limit(fitted.x, halfX), y: limit(fitted.y, halfY) };
+}
+
+export function fitLayerToArea(
+  ctx: CanvasRenderingContext2D,
+  layer: Artwork,
+  product: Product,
+  side: Side,
+): Artwork {
+  const area = printArea(product, side);
+  const { width, height } = layerDimensions(ctx, layer, product, side);
+  const angle = (layer.angle * Math.PI) / 180;
+  const rotatedWidth = Math.abs(width * Math.cos(angle)) + Math.abs(height * Math.sin(angle));
+  const rotatedHeight = Math.abs(width * Math.sin(angle)) + Math.abs(height * Math.cos(angle));
+  if (!rotatedWidth || !rotatedHeight) return layer;
+  const factor = Math.min((area.width - 24) / rotatedWidth, (area.height - 24) / rotatedHeight);
+  const fitted = { ...layer, scale: Math.min(2, Math.max(0.02, layer.scale * factor)) };
+  return constrainLayer(ctx, fitted, product, side);
 }

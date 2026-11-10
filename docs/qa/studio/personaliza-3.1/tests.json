@@ -1,0 +1,42 @@
+{
+  "baseURL": "http://127.0.0.1:3011",
+  "results": [
+    {
+      "name": "A Sudadera completa, dos caras y exportación",
+      "status": "APROBADO"
+    },
+    {
+      "name": "B Tipografías y correspondencia entre editor y PNG",
+      "status": "APROBADO"
+    },
+    {
+      "name": "C Imágenes válidas, errores y eliminación",
+      "status": "APROBADO"
+    },
+    {
+      "name": "D Historial, producto, cara, color y restablecer",
+      "status": "APROBADO"
+    },
+    {
+      "name": "E Colores y volumen de la prenda",
+      "status": "APROBADO"
+    },
+    {
+      "name": "F WhatsApp y parámetros comerciales",
+      "status": "APROBADO"
+    },
+    {
+      "name": "Responsive y accesibilidad 375, 390, 768, 1440",
+      "status": "APROBADO"
+    },
+    {
+      "name": "Estabilidad, recursos y fuentes iniciales",
+      "status": "APROBADO"
+    },
+    {
+      "name": "Táctil: arrastre de texto y vista limpia",
+      "status": "APROBADO"
+    }
+  ],
+  "problems": []
+}

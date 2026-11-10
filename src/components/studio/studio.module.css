@@ -27,6 +27,11 @@
   gap: clamp(28px, 4vw, 66px);
   align-items: start;
 }
+.previewLayout {
+  display: block;
+  max-width: 880px;
+  margin: 0 auto;
+}
 .tools {
   border-top: 1px solid rgba(41, 77, 58, 0.3);
 }
@@ -131,7 +136,7 @@
   margin: 10px 0;
 }
 .fontCategories button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 7px 10px;
   border: 1px solid #a7b9a9;
   background: transparent;
@@ -189,8 +194,8 @@
   margin: 0 0 18px;
 }
 .palettePanel .swatches button {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
 }
 .customColor {
   display: grid;
@@ -235,8 +240,18 @@
   border: 1px solid rgba(0, 0, 0, 0.18);
 }
 .selectedColor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   margin: 10px 0 16px;
+}
+.selectedColorSwatch {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1px solid rgba(41, 77, 58, 0.28);
+  flex: none;
 }
 .segment {
   display: flex;
@@ -376,6 +391,43 @@
   display: flex;
   gap: 5px;
 }
+.previewActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.previewSides {
+  display: flex;
+  border: 1px solid var(--forest);
+}
+.previewSides button {
+  min-height: 42px;
+  min-width: 70px;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--forest);
+  font: 600 13px var(--font-body);
+  cursor: pointer;
+}
+.previewSides button[aria-pressed='true'] {
+  background: var(--forest);
+  color: var(--ivory);
+}
+.previewToggle {
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 1px solid var(--forest);
+  color: var(--ivory);
+  background: var(--forest);
+  font: 600 13px var(--font-body);
+  cursor: pointer;
+}
+.previewToggle[aria-pressed='true'] {
+  color: var(--forest);
+  background: transparent;
+}
 .historyActions button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -394,6 +446,10 @@
 }
 .canvasWrap canvas:active {
   cursor: grabbing;
+}
+.canvasWrap[data-clean='true'] canvas {
+  cursor: default;
+  touch-action: pan-y;
 }
 .previewFoot {
   display: flex;

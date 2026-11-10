@@ -8,6 +8,7 @@ import {
   constrainLayer,
   drawScene,
   ensureStudioFont,
+  fitLayerToArea,
   hitLayer,
   layerOutside,
 } from '@/lib/studio-canvas';
@@ -46,6 +47,8 @@ export function Studio() {
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [guides, setGuides] = useState(true);
+  const [cleanPreview, setCleanPreview] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [quantity, setQuantity] = useState('1');
   const [size, setSize] = useState('M');
   const [notes, setNotes] = useState('');
@@ -60,20 +63,29 @@ export function Studio() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const imagesRef = useRef(new Map<string, HTMLImageElement>());
+  const pendingImagesRef = useRef(new Map<string, HTMLImageElement>());
+  const usedImagesRef = useRef(new Set<string>());
+  const redrawRef = useRef<() => void>(() => {});
   const dragRef = useRef<{ id: string; start: Designs; moved: boolean } | null>(null);
   const product = studioProducts.find((item) => item.id === productId)!;
   const design = history.present[productId];
   const layers = design.layers[design.side];
   const selected = layers.find((layer) => layer.id === selectedId);
   const color = colorHex(design.color);
+  const fontSignature = layers
+    .filter((layer): layer is Extract<Artwork, { kind: 'text' }> => layer.kind === 'text')
+    .map((layer) => `${layer.font}:${layer.weight ?? (layer.font === 'bold' ? 700 : 400)}`)
+    .join('|');
   useEffect(() => {
     let active = true;
     const loading = [
-      ...layers
-        .filter((layer): layer is Extract<Artwork, { kind: 'text' }> => layer.kind === 'text')
-        .map((layer) =>
-          ensureStudioFont(layer.font, layer.weight ?? (layer.font === 'bold' ? 700 : 400)),
-        ),
+      ...fontSignature
+        .split('|')
+        .filter(Boolean)
+        .map((entry) => {
+          const [id, weight] = entry.split(':');
+          return ensureStudioFont(id as FontId, Number(weight) as 400 | 700);
+        }),
       ...fontOptions
         .filter((option) => option.category === fontCategory)
         .map((option) => ensureStudioFont(option.id)),
@@ -91,7 +103,7 @@ export function Studio() {
     return () => {
       active = false;
     };
-  }, [layers, fontCategory]);
+  }, [fontSignature, fontCategory]);
   function selectColor(selection: string) {
     changeDesign((current) => ({ ...current, color: selection }));
     setHexInput(colorHex(selection));
@@ -203,34 +215,80 @@ export function Studio() {
   }
 
   useEffect(() => {
-    for (const layer of layers) {
-      if (layer.kind !== 'image' || imagesRef.current.has(layer.src)) continue;
-      const image = new Image();
-      image.src = layer.src;
-      image.onload = () => {
-        imagesRef.current.set(layer.src, image);
-        redraw();
-      };
-    }
+    let active = true;
     function redraw() {
+      if (!active) return;
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
       if (!ctx) return;
-      drawScene(ctx, {
-        product,
-        color,
-        side: design.side,
-        layers,
-        selectedId: selectedId ?? undefined,
-        guides,
-        images: imagesRef.current,
-      });
-      const active = layers.find((layer) => layer.id === selectedId);
-      setOutside(active ? layerOutside(ctx, active, product, design.side) : false);
+      drawScene(
+        ctx,
+        {
+          product,
+          color,
+          side: design.side,
+          layers,
+          selectedId: cleanPreview ? undefined : (selectedId ?? undefined),
+          guides: !cleanPreview && guides,
+          alignGuides: !cleanPreview && dragging,
+          images: imagesRef.current,
+        },
+        cleanPreview,
+      );
+      const selectedLayer = layers.find((layer) => layer.id === selectedId);
+      setOutside(selectedLayer ? layerOutside(ctx, selectedLayer, product, design.side) : false);
     }
-    document.fonts.ready.then(redraw);
+    redrawRef.current = redraw;
+    for (const layer of layers) {
+      if (
+        layer.kind !== 'image' ||
+        imagesRef.current.has(layer.src) ||
+        pendingImagesRef.current.has(layer.src)
+      )
+        continue;
+      const image = new Image();
+      pendingImagesRef.current.set(layer.src, image);
+      image.onload = () => {
+        pendingImagesRef.current.delete(layer.src);
+        if (!usedImagesRef.current.has(layer.src)) return;
+        imagesRef.current.set(layer.src, image);
+        redrawRef.current();
+      };
+      image.onerror = () => {
+        pendingImagesRef.current.delete(layer.src);
+        if (!usedImagesRef.current.has(layer.src)) return;
+        setUploadError('No pudimos mostrar la imagen. Elige otro archivo.');
+      };
+      image.src = layer.src;
+    }
+    document.fonts.ready.then(() => {
+      if (active) redraw();
+    });
     redraw();
-  }, [product, color, design.side, layers, selectedId, guides, fontReady]);
+    return () => {
+      active = false;
+      if (redrawRef.current === redraw) redrawRef.current = () => {};
+    };
+  }, [product, color, design.side, layers, selectedId, guides, cleanPreview, dragging, fontReady]);
+
+  useEffect(() => {
+    const used = new Set<string>();
+    for (const state of [...history.past, history.present, ...history.future]) {
+      for (const item of Object.values(state)) {
+        for (const layer of [...item.layers.frente, ...item.layers.espalda]) {
+          if (layer.kind === 'image') used.add(layer.src);
+        }
+      }
+    }
+    usedImagesRef.current = used;
+    for (const source of imagesRef.current.keys()) {
+      if (!used.has(source)) imagesRef.current.delete(source);
+    }
+    for (const source of pendingImagesRef.current.keys()) {
+      if (used.has(source)) continue;
+      pendingImagesRef.current.delete(source);
+    }
+  }, [history]);
 
   useEffect(() => {
     if (
@@ -255,6 +313,7 @@ export function Studio() {
     };
   }
   function pointerDown(event: React.PointerEvent<HTMLCanvasElement>) {
+    if (cleanPreview) return;
     const ctx = canvasRef.current?.getContext('2d');
     if (!ctx) return;
     const point = canvasPosition(event);
@@ -267,6 +326,7 @@ export function Studio() {
     setSelectedId(id);
     if (id) {
       dragRef.current = { id, start: history.present, moved: false };
+      setDragging(true);
       event.currentTarget.setPointerCapture(event.pointerId);
     }
   }
@@ -301,6 +361,7 @@ export function Studio() {
   function pointerUp() {
     const drag = dragRef.current;
     dragRef.current = null;
+    setDragging(false);
     if (drag?.moved)
       setHistory((current) => ({
         ...current,
@@ -440,408 +501,442 @@ export function Studio() {
           complicaciones.
         </p>
       </header>
-      <div className={styles.layout}>
-        <div className={styles.tools}>
-          <section className={styles.group}>
-            <h2>
-              <span>01</span> Elige tu lienzo
-            </h2>
-            <div className={styles.productChoices}>
-              {studioProducts
-                .filter((item) => item.available)
-                .map((item) => (
+      <div className={`${styles.layout} ${cleanPreview ? styles.previewLayout : ''}`}>
+        {!cleanPreview && (
+          <div className={styles.tools}>
+            <section className={styles.group}>
+              <h2>
+                <span>01</span> Elige tu lienzo
+              </h2>
+              <div className={styles.productChoices}>
+                {studioProducts
+                  .filter((item) => item.available)
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-pressed={productId === item.id}
+                      onClick={() => {
+                        setProductId(item.id);
+                        setSelectedId(null);
+                        setSize('M');
+                      }}
+                    >
+                      {item.name}
+                      <small>{item.description}</small>
+                    </button>
+                  ))}
+              </div>
+            </section>
+            <section className={styles.group}>
+              <h2>
+                <span>02</span> Color y vista
+              </h2>
+              <p className={styles.help}>
+                Los colores son ilustrativos. La disponibilidad y el tono final se confirman al
+                cotizar.
+              </p>
+              <div className={styles.colorQuick}>
+                {studioColors.slice(0, 2).map((entry) => (
                   <button
-                    key={item.id}
+                    key={entry.name}
                     type="button"
-                    aria-pressed={productId === item.id}
-                    onClick={() => {
-                      setProductId(item.id);
-                      setSelectedId(null);
-                      setSize('M');
-                    }}
+                    aria-label={entry.name}
+                    aria-pressed={design.color === entry.name}
+                    onClick={() => selectColor(entry.name)}
+                    style={{ '--swatch': entry.value } as React.CSSProperties}
                   >
-                    {item.name}
-                    <small>{item.description}</small>
+                    <span />
                   </button>
                 ))}
-            </div>
-          </section>
-          <section className={styles.group}>
-            <h2>
-              <span>02</span> Color y vista
-            </h2>
-            <p className={styles.help}>
-              Los colores son ilustrativos. La disponibilidad y el tono final se confirman al
-              cotizar.
-            </p>
-            <div className={styles.colorQuick}>
-              {studioColors.slice(0, 2).map((entry) => (
                 <button
-                  key={entry.name}
                   type="button"
-                  aria-label={entry.name}
-                  aria-pressed={design.color === entry.name}
-                  onClick={() => selectColor(entry.name)}
-                  style={{ '--swatch': entry.value } as React.CSSProperties}
+                  className={styles.paletteToggle}
+                  aria-expanded={paletteOpen}
+                  onClick={() => setPaletteOpen((open) => !open)}
                 >
-                  <span />
+                  {paletteOpen ? 'Cerrar paleta' : 'Explorar colores'}{' '}
+                  <span aria-hidden="true">⌄</span>
                 </button>
-              ))}
-              <button
-                type="button"
-                className={styles.paletteToggle}
-                aria-expanded={paletteOpen}
-                onClick={() => setPaletteOpen((open) => !open)}
-              >
-                {paletteOpen ? 'Cerrar paleta' : 'Explorar colores'}{' '}
-                <span aria-hidden="true">⌄</span>
-              </button>
-            </div>
-            <p className={styles.selectedColor}>
-              {colorName(design.color)} · {color}
-            </p>
-            {paletteOpen && (
-              <div className={styles.palettePanel}>
-                <p className={styles.subhead}>Colores populares</p>
-                <div className={styles.swatches}>
-                  {product.colors.map((entry) => (
+              </div>
+              <p className={styles.selectedColor}>
+                <span
+                  className={styles.selectedColorSwatch}
+                  style={{ backgroundColor: color }}
+                  aria-hidden="true"
+                />
+                {design.color.startsWith('#') ? 'Color personalizado' : colorName(design.color)}
+              </p>
+              {paletteOpen && (
+                <div className={styles.palettePanel}>
+                  <p className={styles.subhead}>Colores populares</p>
+                  <div className={styles.swatches}>
+                    {product.colors.map((entry) => (
+                      <button
+                        key={entry.name}
+                        type="button"
+                        title={`${entry.name} ${entry.value}`}
+                        aria-label={`${entry.name} ${entry.value}`}
+                        aria-pressed={design.color === entry.name}
+                        onClick={() => selectColor(entry.name)}
+                        style={{ '--swatch': entry.value } as React.CSSProperties}
+                      >
+                        <span />
+                      </button>
+                    ))}
+                  </div>
+                  <p className={styles.subhead}>Tu propio tono</p>
+                  <div className={styles.customColor}>
+                    <label>
+                      Elegir color
+                      <input
+                        type="color"
+                        value={color}
+                        onChange={(event) => selectColor(event.target.value.toUpperCase())}
+                      />
+                    </label>
+                    <label>
+                      Código HEX
+                      <input
+                        type="text"
+                        value={hexInput || color}
+                        maxLength={7}
+                        onChange={(event) => setHexInput(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter') {
+                            event.preventDefault();
+                            if (/^#[0-9a-fA-F]{6}$/.test(hexInput))
+                              selectColor(hexInput.toUpperCase());
+                            else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
+                          }
+                        }}
+                      />
+                    </label>
                     <button
-                      key={entry.name}
                       type="button"
-                      title={`${entry.name} ${entry.value}`}
-                      aria-label={`${entry.name} ${entry.value}`}
-                      aria-pressed={design.color === entry.name}
-                      onClick={() => selectColor(entry.name)}
-                      style={{ '--swatch': entry.value } as React.CSSProperties}
+                      onClick={() => {
+                        if (/^#[0-9a-fA-F]{6}$/.test(hexInput)) selectColor(hexInput.toUpperCase());
+                        else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
+                      }}
                     >
-                      <span />
+                      Aplicar
+                    </button>
+                  </div>
+                  {hexError && (
+                    <p role="alert" className={styles.warning}>
+                      {hexError}
+                    </p>
+                  )}
+                </div>
+              )}
+              {product.sides.length > 1 && (
+                <div className={styles.segment}>
+                  {product.sides.map((side) => (
+                    <button
+                      key={side}
+                      type="button"
+                      aria-pressed={design.side === side}
+                      onClick={() => {
+                        changeDesign((current) => ({ ...current, side }));
+                        setSelectedId(null);
+                      }}
+                    >
+                      {side === 'frente' ? 'Frente' : 'Espalda'}
                     </button>
                   ))}
                 </div>
-                <p className={styles.subhead}>Tu propio tono</p>
-                <div className={styles.customColor}>
-                  <label>
-                    Elegir color
-                    <input
-                      type="color"
-                      value={color}
-                      onChange={(event) => selectColor(event.target.value.toUpperCase())}
-                    />
-                  </label>
-                  <label>
-                    Código HEX
-                    <input
-                      type="text"
-                      value={hexInput || color}
-                      maxLength={7}
-                      onChange={(event) => setHexInput(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          if (/^#[0-9a-fA-F]{6}$/.test(hexInput))
-                            selectColor(hexInput.toUpperCase());
-                          else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
-                        }
-                      }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (/^#[0-9a-fA-F]{6}$/.test(hexInput)) selectColor(hexInput.toUpperCase());
-                      else setHexError('Escribe un HEX válido, por ejemplo #294D3A.');
-                    }}
-                  >
-                    Aplicar
-                  </button>
-                </div>
-                {hexError && (
-                  <p role="alert" className={styles.warning}>
-                    {hexError}
-                  </p>
-                )}
+              )}
+            </section>
+            <section className={styles.group}>
+              <h2>
+                <span>03</span> Hazlo tuyo
+              </h2>
+              <div className={styles.toolActions}>
+                <button type="button" onClick={() => addText()}>
+                  + Agregar texto
+                </button>
+                <button type="button" onClick={() => fileRef.current?.click()}>
+                  {selected?.kind === 'image' ? 'Reemplazar imagen' : '+ Subir imagen'}
+                </button>
               </div>
-            )}
-            {product.sides.length > 1 && (
-              <div className={styles.segment}>
-                {product.sides.map((side) => (
+              <input
+                ref={fileRef}
+                className={styles.fileInput}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => onFile(event.target.files?.[0])}
+                aria-label="Subir PNG, JPG o WebP"
+              />
+              <p className={styles.help}>
+                PNG, JPG o WebP · máximo 10 MB. Tu archivo permanece en esta pestaña.
+              </p>
+              {uploadError && (
+                <p className={styles.warning} role="alert">
+                  {uploadError}
+                </p>
+              )}
+              <p className={styles.subhead}>Un punto de partida</p>
+              <div className={styles.motifs}>
+                {motifs.map((motif) => (
                   <button
-                    key={side}
                     type="button"
-                    aria-pressed={design.side === side}
-                    onClick={() => {
-                      changeDesign((current) => ({ ...current, side }));
-                      setSelectedId(null);
-                    }}
+                    key={motif.name}
+                    onClick={() => addText(motif.text, motif.font)}
                   >
-                    {side === 'frente' ? 'Frente' : 'Espalda'}
+                    {motif.name}
                   </button>
                 ))}
               </div>
-            )}
-          </section>
-          <section className={styles.group}>
-            <h2>
-              <span>03</span> Hazlo tuyo
-            </h2>
-            <div className={styles.toolActions}>
-              <button type="button" onClick={() => addText()}>
-                + Agregar texto
-              </button>
-              <button type="button" onClick={() => fileRef.current?.click()}>
-                {selected?.kind === 'image' ? 'Reemplazar imagen' : '+ Subir imagen'}
-              </button>
-            </div>
-            <input
-              ref={fileRef}
-              className={styles.fileInput}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={(event) => onFile(event.target.files?.[0])}
-              aria-label="Subir PNG, JPG o WebP"
-            />
-            <p className={styles.help}>
-              PNG, JPG o WebP · máximo 10 MB. Tu archivo permanece en esta pestaña.
-            </p>
-            {uploadError && (
-              <p className={styles.warning} role="alert">
-                {uploadError}
-              </p>
-            )}
-            <p className={styles.subhead}>Un punto de partida</p>
-            <div className={styles.motifs}>
-              {motifs.map((motif) => (
-                <button
-                  type="button"
-                  key={motif.name}
-                  onClick={() => addText(motif.text, motif.font)}
-                >
-                  {motif.name}
-                </button>
-              ))}
-            </div>
-          </section>
-          <section className={styles.group}>
-            <h2>
-              <span>04</span> Ajusta tu diseño
-            </h2>
-            {selected ? (
-              <>
-                <p className={styles.help}>
-                  Seleccionado: {selected.kind === 'text' ? 'texto' : selected.name}. También puedes
-                  arrastrarlo en la vista.
-                </p>
-                {selected.kind === 'text' && (
-                  <>
-                    <label>
-                      Texto
-                      <textarea
-                        rows={2}
-                        maxLength={60}
-                        value={selected.text}
-                        onChange={(event) => changeLayer({ text: event.target.value })}
-                      />
-                    </label>
-                    <p className={styles.subhead}>
-                      Tipografía · {fontOptions.find((option) => option.id === selected.font)?.name}
-                    </p>
-                    <div className={styles.fontCategories}>
-                      {['Elegantes', 'Modernas', 'Impactantes', 'Manuscritas'].map((category) => (
-                        <button
-                          key={category}
-                          type="button"
-                          aria-pressed={fontCategory === category}
-                          onClick={() => setFontCategory(category)}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                    <div className={styles.fontChoices}>
-                      {fontOptions
-                        .filter((option) => option.category === fontCategory)
-                        .map((option) => (
+            </section>
+            <section className={styles.group}>
+              <h2>
+                <span>04</span> Ajusta tu diseño
+              </h2>
+              {selected ? (
+                <>
+                  <p className={styles.help}>
+                    Seleccionado: {selected.kind === 'text' ? 'texto' : selected.name}. También
+                    puedes arrastrarlo en la vista.
+                  </p>
+                  {selected.kind === 'text' && (
+                    <>
+                      <label>
+                        Texto
+                        <textarea
+                          rows={2}
+                          maxLength={60}
+                          value={selected.text}
+                          onChange={(event) => changeLayer({ text: event.target.value })}
+                        />
+                      </label>
+                      <p className={styles.subhead}>
+                        Tipografía ·{' '}
+                        {fontOptions.find((option) => option.id === selected.font)?.name}
+                      </p>
+                      <div className={styles.fontCategories}>
+                        {['Elegantes', 'Modernas', 'Impactantes', 'Manuscritas'].map((category) => (
                           <button
-                            key={option.id}
+                            key={category}
                             type="button"
-                            aria-label={`Tipografía ${option.name}`}
-                            aria-pressed={selected.font === option.id}
-                            onClick={() =>
+                            aria-pressed={fontCategory === category}
+                            onClick={() => setFontCategory(category)}
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                      <div className={styles.fontChoices}>
+                        {fontOptions
+                          .filter((option) => option.category === fontCategory)
+                          .map((option) => (
+                            <button
+                              key={option.id}
+                              type="button"
+                              aria-label={`Tipografía ${option.name}`}
+                              aria-pressed={selected.font === option.id}
+                              onClick={() =>
+                                changeLayer({
+                                  font: option.id,
+                                  weight: fontSupportsBold(option.id)
+                                    ? (selected.weight ?? (option.id === 'bold' ? 700 : 400))
+                                    : 400,
+                                })
+                              }
+                            >
+                              <span
+                                style={{
+                                  fontFamily: `"${option.family}", serif`,
+                                  fontWeight: option.weight ?? '400',
+                                }}
+                              >
+                                Aa Genhora
+                              </span>
+                              <small>{option.name}</small>
+                            </button>
+                          ))}
+                      </div>
+                      <label>
+                        Color del texto
+                        <input
+                          type="color"
+                          value={selected.color}
+                          onChange={(event) => changeLayer({ color: event.target.value })}
+                        />
+                      </label>
+                      <div className={styles.fieldPair}>
+                        {fontSupportsBold(selected.font) && (
+                          <label>
+                            Grosor
+                            <select
+                              value={selected.weight ?? (selected.font === 'bold' ? 700 : 400)}
+                              onChange={(event) =>
+                                changeLayer({ weight: Number(event.target.value) as 400 | 700 })
+                              }
+                            >
+                              <option value="400">Regular</option>
+                              <option value="700">Negrita</option>
+                            </select>
+                          </label>
+                        )}
+                        <label>
+                          Alineación
+                          <select
+                            value={selected.align ?? 'center'}
+                            onChange={(event) =>
                               changeLayer({
-                                font: option.id,
-                                weight: fontSupportsBold(option.id)
-                                  ? (selected.weight ?? (option.id === 'bold' ? 700 : 400))
-                                  : 400,
+                                align: event.target.value as 'left' | 'center' | 'right',
                               })
                             }
                           >
-                            <span
-                              style={{
-                                fontFamily: `"${option.family}", serif`,
-                                fontWeight: option.weight ?? '400',
-                              }}
-                            >
-                              Aa Genhora
-                            </span>
-                            <small>{option.name}</small>
-                          </button>
-                        ))}
-                    </div>
-                    <label>
-                      Color del texto
-                      <input
-                        type="color"
-                        value={selected.color}
-                        onChange={(event) => changeLayer({ color: event.target.value })}
-                      />
-                    </label>
-                    <div className={styles.fieldPair}>
-                      {fontSupportsBold(selected.font) && (
-                        <label>
-                          Grosor
-                          <select
-                            value={selected.weight ?? (selected.font === 'bold' ? 700 : 400)}
-                            onChange={(event) =>
-                              changeLayer({ weight: Number(event.target.value) as 400 | 700 })
-                            }
-                          >
-                            <option value="400">Regular</option>
-                            <option value="700">Negrita</option>
+                            <option value="left">Izquierda</option>
+                            <option value="center">Centro</option>
+                            <option value="right">Derecha</option>
                           </select>
                         </label>
-                      )}
-                      <label>
-                        Alineación
-                        <select
-                          value={selected.align ?? 'center'}
-                          onChange={(event) =>
-                            changeLayer({
-                              align: event.target.value as 'left' | 'center' | 'right',
-                            })
-                          }
-                        >
-                          <option value="left">Izquierda</option>
-                          <option value="center">Centro</option>
-                          <option value="right">Derecha</option>
-                        </select>
-                      </label>
-                    </div>
-                  </>
-                )}
-                {selected.kind === 'image' && (
-                  <p className={styles.help}>
-                    Imagen: {selected.pixelWidth} × {selected.pixelHeight} px.
-                  </p>
-                )}
-                <div className={styles.fieldPair}>
-                  <label>
-                    Horizontal <span>{Math.round(selected.x * 100)}%</span>
-                    <input
-                      type="range"
-                      min="0.02"
-                      max="0.98"
-                      step="0.01"
-                      value={selected.x}
-                      onChange={(event) => changeLayer({ x: Number(event.target.value) })}
-                    />
-                  </label>
-                  <label>
-                    Vertical <span>{Math.round(selected.y * 100)}%</span>
-                    <input
-                      type="range"
-                      min="0.02"
-                      max="0.98"
-                      step="0.01"
-                      value={selected.y}
-                      onChange={(event) => changeLayer({ y: Number(event.target.value) })}
-                    />
-                  </label>
-                </div>
-                <div className={styles.fieldPair}>
-                  <label>
-                    Tamaño <span>{Math.round(selected.scale * 100)}%</span>
-                    <input
-                      type="range"
-                      min="0.02"
-                      max="2"
-                      step="0.01"
-                      value={selected.scale}
-                      onChange={(event) => changeLayer({ scale: Number(event.target.value) })}
-                    />
-                  </label>
-                  <label>
-                    Rotación <span>{selected.angle}°</span>
-                    <input
-                      type="range"
-                      min="-180"
-                      max="180"
-                      step="1"
-                      value={selected.angle}
-                      onChange={(event) => changeLayer({ angle: Number(event.target.value) })}
-                    />
-                  </label>
-                </div>
-                <div className={styles.layerActions}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const clone = {
-                        ...selected,
-                        id: newId(),
-                        x: clamp(selected.x + 0.08, 0.02, 0.98),
-                        y: clamp(selected.y + 0.08, 0.02, 0.98),
-                      };
-                      const ctx = canvasRef.current?.getContext('2d');
-                      changeLayers((current) => [
-                        ...current,
-                        ctx ? constrainLayer(ctx, clone, product, design.side) : clone,
-                      ]);
-                      setSelectedId(clone.id);
-                    }}
-                  >
-                    Duplicar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      changeLayers((current) => {
-                        const index = current.findIndex((layer) => layer.id === selected.id);
-                        if (index < 0 || index === current.length - 1) return current;
-                        const next = [...current];
-                        const [layer] = next.splice(index, 1);
-                        next.push(layer);
-                        return next;
-                      })
-                    }
-                  >
-                    Traer al frente
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      changeLayers((current) =>
-                        current.filter((layer) => layer.id !== selected.id),
-                      );
-                      setSelectedId(null);
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-                {outside && (
-                  <p className={styles.warning} role="status">
-                    Parte del diseño está fuera de la zona y se recortará. Reduce su tamaño o
-                    muévelo.
-                  </p>
-                )}
-              </>
-            ) : (
-              <p className={styles.help}>
-                Agrega un elemento y selecciónalo para cambiar posición, tamaño y rotación.
-              </p>
-            )}
-          </section>
-        </div>
+                      </div>
+                    </>
+                  )}
+                  {selected.kind === 'image' && (
+                    <p className={styles.help}>
+                      Imagen: {selected.pixelWidth} × {selected.pixelHeight} px.
+                    </p>
+                  )}
+                  <div className={styles.fieldPair}>
+                    <label>
+                      Horizontal <span>{Math.round(selected.x * 100)}%</span>
+                      <input
+                        type="range"
+                        min="0.02"
+                        max="0.98"
+                        step="0.01"
+                        value={selected.x}
+                        onChange={(event) => changeLayer({ x: Number(event.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      Vertical <span>{Math.round(selected.y * 100)}%</span>
+                      <input
+                        type="range"
+                        min="0.02"
+                        max="0.98"
+                        step="0.01"
+                        value={selected.y}
+                        onChange={(event) => changeLayer({ y: Number(event.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <div className={styles.fieldPair}>
+                    <label>
+                      Tamaño <span>{Math.round(selected.scale * 100)}%</span>
+                      <input
+                        type="range"
+                        min="0.02"
+                        max="2"
+                        step="0.01"
+                        value={selected.scale}
+                        onChange={(event) => changeLayer({ scale: Number(event.target.value) })}
+                      />
+                    </label>
+                    <label>
+                      Rotación <span>{selected.angle}°</span>
+                      <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        step="1"
+                        value={selected.angle}
+                        onChange={(event) => changeLayer({ angle: Number(event.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <div className={styles.layerActions}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        changeLayer({ x: 0.5, y: 0.5 });
+                        setFeedback('Elemento centrado en el área de personalización.');
+                      }}
+                    >
+                      Centrar diseño
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const ctx = canvasRef.current?.getContext('2d');
+                        if (!ctx) return;
+                        changeLayers((current) =>
+                          current.map((layer) =>
+                            layer.id === selected.id
+                              ? fitLayerToArea(ctx, layer, product, design.side)
+                              : layer,
+                          ),
+                        );
+                        setFeedback('Escala ajustada al área sin alterar la proporción.');
+                      }}
+                    >
+                      Ajustar al área
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const clone = {
+                          ...selected,
+                          id: newId(),
+                          x: clamp(selected.x + 0.08, 0.02, 0.98),
+                          y: clamp(selected.y + 0.08, 0.02, 0.98),
+                        };
+                        const ctx = canvasRef.current?.getContext('2d');
+                        changeLayers((current) => [
+                          ...current,
+                          ctx ? constrainLayer(ctx, clone, product, design.side) : clone,
+                        ]);
+                        setSelectedId(clone.id);
+                      }}
+                    >
+                      Duplicar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        changeLayers((current) => {
+                          const index = current.findIndex((layer) => layer.id === selected.id);
+                          if (index < 0 || index === current.length - 1) return current;
+                          const next = [...current];
+                          const [layer] = next.splice(index, 1);
+                          next.push(layer);
+                          return next;
+                        })
+                      }
+                    >
+                      Traer al frente
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        changeLayers((current) =>
+                          current.filter((layer) => layer.id !== selected.id),
+                        );
+                        setSelectedId(null);
+                      }}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                  {outside && (
+                    <p className={styles.warning} role="status">
+                      Parte del diseño está fuera de la zona y se recortará. Reduce su tamaño o
+                      muévelo.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className={styles.help}>
+                  Agrega un elemento y selecciónalo para cambiar posición, tamaño y rotación.
+                </p>
+              )}
+            </section>
+          </div>
+        )}
         <div className={styles.previewColumn}>
           <div className={styles.previewTop}>
             <div>
@@ -850,16 +945,42 @@ export function Studio() {
                 {product.name} · {design.side}
               </h2>
             </div>
-            <div className={styles.historyActions}>
-              <button type="button" disabled={!history.past.length} onClick={undo}>
-                Deshacer
-              </button>
-              <button type="button" disabled={!history.future.length} onClick={redo}>
-                Rehacer
+            <div className={styles.previewActions}>
+              {cleanPreview && product.sides.length > 1 && (
+                <div className={styles.previewSides} aria-label="Vista de la prenda">
+                  {product.sides.map((side) => (
+                    <button
+                      key={side}
+                      type="button"
+                      aria-pressed={design.side === side}
+                      onClick={() => changeDesign((current) => ({ ...current, side }))}
+                    >
+                      {side === 'frente' ? 'Frente' : 'Espalda'}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {!cleanPreview && (
+                <div className={styles.historyActions}>
+                  <button type="button" disabled={!history.past.length} onClick={undo}>
+                    Deshacer
+                  </button>
+                  <button type="button" disabled={!history.future.length} onClick={redo}>
+                    Rehacer
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                className={styles.previewToggle}
+                aria-pressed={cleanPreview}
+                onClick={() => setCleanPreview((current) => !current)}
+              >
+                {cleanPreview ? 'Volver a editar' : 'Ver sin guías'}
               </button>
             </div>
           </div>
-          <div className={styles.canvasWrap}>
+          <div className={styles.canvasWrap} data-clean={cleanPreview}>
             <canvas
               ref={canvasRef}
               width={CANVAS_SIZE}
@@ -868,146 +989,152 @@ export function Studio() {
               onPointerMove={pointerMove}
               onPointerUp={pointerUp}
               onPointerCancel={pointerUp}
-              aria-label={`Vista editable de ${product.name}, ${design.color}, ${design.side}`}
+              aria-label={`${cleanPreview ? 'Vista previa' : 'Vista editable'} de ${product.name}, ${design.color}, ${design.side}`}
               role="img"
             />
           </div>
-          <div className={styles.previewFoot}>
-            <label>
-              <input
-                type="checkbox"
-                checked={guides}
-                onChange={(event) => setGuides(event.target.checked)}
-              />{' '}
-              Mostrar zona y margen de seguridad
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  layers.length &&
-                  !window.confirm('¿Restablecer esta vista? Se eliminarán sus elementos.')
-                )
-                  return;
-                changeLayers(() => []);
-                setSelectedId(null);
-              }}
-            >
-              Restablecer esta vista
-            </button>
-          </div>
+          {!cleanPreview && (
+            <div className={styles.previewFoot}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={guides}
+                  onChange={(event) => setGuides(event.target.checked)}
+                />{' '}
+                Mostrar zona y margen de seguridad
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    layers.length &&
+                    !window.confirm('¿Restablecer esta vista? Se eliminarán sus elementos.')
+                  )
+                    return;
+                  changeLayers(() => []);
+                  setSelectedId(null);
+                }}
+              >
+                Restablecer esta vista
+              </button>
+            </div>
+          )}
           <p className={styles.help}>
             Vista previa ilustrativa. Los colores, proporciones y acabados finales pueden variar. La
             zona marcada no representa medidas de impresión confirmadas.
           </p>
-          <div className={styles.layers}>
-            <h3>Capas de esta vista</h3>
-            {layers.length ? (
-              layers.map((layer) => (
-                <button
-                  type="button"
-                  key={layer.id}
-                  aria-pressed={selectedId === layer.id}
-                  onClick={() => setSelectedId(layer.id)}
-                >
-                  {layer.kind === 'text' ? layer.text || 'Texto vacío' : layer.name}
-                </button>
-              ))
-            ) : (
-              <p>Aún no hay elementos. Puedes comenzar solo con texto.</p>
-            )}
-          </div>
+          {!cleanPreview && (
+            <div className={styles.layers}>
+              <h3>Capas de esta vista</h3>
+              {layers.length ? (
+                layers.map((layer) => (
+                  <button
+                    type="button"
+                    key={layer.id}
+                    aria-pressed={selectedId === layer.id}
+                    onClick={() => setSelectedId(layer.id)}
+                  >
+                    {layer.kind === 'text' ? layer.text || 'Texto vacío' : layer.name}
+                  </button>
+                ))
+              ) : (
+                <p>Aún no hay elementos. Puedes comenzar solo con texto.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
-      <section className={styles.quote}>
-        <div>
-          <p className="eyebrow">LLEVA TU IDEA MÁS LEJOS</p>
-          <h2>Lista para imaginarla de verdad.</h2>
-          <p>
-            Descarga tu propuesta y compártela al solicitar una cotización. El archivo no se adjunta
-            automáticamente a WhatsApp.
-          </p>
-        </div>
-        <div className={styles.quoteFields}>
-          <label>
-            Cantidad de piezas
-            <input
-              type="number"
-              min="1"
-              max="100000"
-              step="1"
-              value={quantity}
-              onChange={(event) => setQuantity(event.target.value)}
-            />
-          </label>
-          {product.sizes && (
-            <label>
-              Talla de referencia
-              <select value={size} onChange={(event) => setSize(event.target.value)}>
-                {product.sizes.map((option) => (
-                  <option key={option}>{option}</option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label className={styles.notes}>
-            Observaciones (opcional)
-            <textarea
-              rows={2}
-              maxLength={500}
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              placeholder="Detalles que debamos saber"
-            />
-          </label>
-          <div className={styles.quoteActions}>
-            {product.sides.map((side) => (
-              <button key={side} type="button" onClick={() => download(side)}>
-                Descargar mi diseño · {side}
-              </button>
-            ))}
-            <button type="button" onClick={shareImage}>
-              Compartir imagen · {design.side}
-            </button>
-            {!validQuantity && (
-              <p className={styles.warning} role="alert">
-                Indica una cantidad mayor que cero para cotizar.
-              </p>
-            )}
-            {whatsapp && validQuantity ? (
-              <a className={styles.whatsapp} href={whatsapp} target="_blank" rel="noreferrer">
-                Cotizar por WhatsApp ↗
-              </a>
-            ) : !whatsapp ? (
-              <Link className={styles.whatsapp} href="/contacto">
-                Ir a contacto ↗
-              </Link>
-            ) : null}
-            <button
-              type="button"
-              className={styles.copy}
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(message);
-                  setFeedback('Mensaje de cotización copiado.');
-                } catch {
-                  setFeedback('No se pudo copiar automáticamente.');
-                }
-              }}
-            >
-              Copiar mensaje
-            </button>
+      {!cleanPreview && (
+        <section className={styles.quote}>
+          <div>
+            <p className="eyebrow">LLEVA TU IDEA MÁS LEJOS</p>
+            <h2>Lista para imaginarla de verdad.</h2>
+            <p>
+              Descarga tu propuesta y compártela al solicitar una cotización. El archivo no se
+              adjunta automáticamente a WhatsApp.
+            </p>
           </div>
-          <p className={styles.help}>
-            Descarga la imagen y adjúntala tú mismo en WhatsApp, o usa Compartir imagen si tu
-            dispositivo lo permite. La cantidad, talla, colores y disponibilidad deben confirmarse.
-            El archivo no se sube a este sitio.
-          </p>
-          <p role="status" className={styles.status}>
-            {feedback}
-          </p>
-        </div>
-      </section>
+          <div className={styles.quoteFields}>
+            <label>
+              Cantidad de piezas
+              <input
+                type="number"
+                min="1"
+                max="100000"
+                step="1"
+                value={quantity}
+                onChange={(event) => setQuantity(event.target.value)}
+              />
+            </label>
+            {product.sizes && (
+              <label>
+                Talla de referencia
+                <select value={size} onChange={(event) => setSize(event.target.value)}>
+                  {product.sizes.map((option) => (
+                    <option key={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label className={styles.notes}>
+              Observaciones (opcional)
+              <textarea
+                rows={2}
+                maxLength={500}
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Detalles que debamos saber"
+              />
+            </label>
+            <div className={styles.quoteActions}>
+              {product.sides.map((side) => (
+                <button key={side} type="button" onClick={() => download(side)}>
+                  Descargar mi diseño · {side}
+                </button>
+              ))}
+              <button type="button" onClick={shareImage}>
+                Compartir imagen · {design.side}
+              </button>
+              {!validQuantity && (
+                <p className={styles.warning} role="alert">
+                  Indica una cantidad mayor que cero para cotizar.
+                </p>
+              )}
+              {whatsapp && validQuantity ? (
+                <a className={styles.whatsapp} href={whatsapp} target="_blank" rel="noreferrer">
+                  Cotizar por WhatsApp ↗
+                </a>
+              ) : !whatsapp ? (
+                <Link className={styles.whatsapp} href="/contacto">
+                  Ir a contacto ↗
+                </Link>
+              ) : null}
+              <button
+                type="button"
+                className={styles.copy}
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(message);
+                    setFeedback('Mensaje de cotización copiado.');
+                  } catch {
+                    setFeedback('No se pudo copiar automáticamente.');
+                  }
+                }}
+              >
+                Copiar mensaje
+              </button>
+            </div>
+            <p className={styles.help}>
+              Descarga la imagen y adjúntala tú mismo en WhatsApp, o usa Compartir imagen si tu
+              dispositivo lo permite. La cantidad, talla, colores y disponibilidad deben
+              confirmarse. El archivo no se sube a este sitio.
+            </p>
+            <p role="status" className={styles.status}>
+              {feedback}
+            </p>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
