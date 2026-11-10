@@ -76,6 +76,9 @@
 .toggle {
   display: none;
 }
+.quickCreate {
+  display: none;
+}
 .nav .mobileQuote {
   display: none;
 }
@@ -166,13 +169,21 @@
   }
 }
 @media (max-width: 600px) {
+  .quickCreate {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    font-size: 11px;
+    margin-left: auto;
+    border-bottom: 1px solid var(--forest);
+  }
   .inner {
     min-height: 80px;
     padding-block: 9px;
     gap: 12px;
   }
   .header .logo {
-    width: 174px;
+    width: 150px;
   }
   .quote {
     display: none;

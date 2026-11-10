@@ -1,0 +1,70 @@
+{
+  "baseURL": "http://127.0.0.1:3014",
+  "results": [
+    {
+      "name": "B2C Inicio → Sudadera → Diseño de dos caras → Cotización",
+      "status": "APROBADO"
+    },
+    {
+      "name": "Editor contextual: tres productos, URL inválida y repetida",
+      "status": "APROBADO"
+    },
+    {
+      "name": "B2B Inicio → Kit Creativo → 40 unidades → Resumen y WhatsApp",
+      "status": "APROBADO"
+    },
+    {
+      "name": "Responsive, accesibilidad, navegación y capturas de páginas",
+      "status": "APROBADO"
+    },
+    {
+      "name": "SEO, imágenes y canal de contacto",
+      "status": "APROBADO"
+    }
+  ],
+  "problems": [],
+  "measurements": [
+    {
+      "path": "/",
+      "domContentLoadedMs": 42,
+      "loadMs": 105,
+      "layoutShift": 0,
+      "transferredBytes": 82888
+    },
+    {
+      "path": "/productos",
+      "domContentLoadedMs": 72,
+      "loadMs": 76,
+      "layoutShift": 0,
+      "transferredBytes": 49720
+    },
+    {
+      "path": "/personaliza",
+      "domContentLoadedMs": 29,
+      "loadMs": 46,
+      "layoutShift": 0,
+      "transferredBytes": 24564
+    },
+    {
+      "path": "/empresas-y-eventos",
+      "domContentLoadedMs": 16,
+      "loadMs": 55,
+      "layoutShift": 0,
+      "transferredBytes": 24149
+    },
+    {
+      "path": "/contacto",
+      "domContentLoadedMs": 47,
+      "loadMs": 60,
+      "layoutShift": 0,
+      "transferredBytes": 26071
+    },
+    {
+      "path": "/nosotros",
+      "domContentLoadedMs": 32,
+      "loadMs": 62,
+      "layoutShift": 0,
+      "transferredBytes": 23848
+    }
+  ]
+}

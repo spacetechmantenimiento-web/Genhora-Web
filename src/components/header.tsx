@@ -76,6 +76,9 @@ export function Header() {
               <Arrow />
             </Link>
           </nav>
+          <Link href="/personaliza" className={styles.quickCreate} onClick={() => setOpen(false)}>
+            Personalizar ↗
+          </Link>
           <Link href="/contacto" className={styles.quote}>
             {siteConfig.cta.quote}
             <Arrow diagonal />

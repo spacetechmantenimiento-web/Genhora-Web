@@ -6,7 +6,7 @@ export function Collections() {
     <section className="collections section-wrap reveal" id="explora">
       <div className="section-heading">
         <div>
-          <Eyebrow>UN UNIVERSO DE POSIBILIDADES</Eyebrow>
+          <Eyebrow>IDEAS QUE INSPIRAN</Eyebrow>
           <h2>
             Hay una idea para
             <br />
@@ -17,7 +17,7 @@ export function Collections() {
           Para ti, para alguien especial o para
           <br className="desktop-break" /> eso que quieres construir con otros.
           <br />
-          Encuentra tu forma de crear.
+          Composiciones conceptuales para imaginar tu próximo diseño.
         </p>
       </div>
       <div className="collection-grid">
@@ -103,7 +103,7 @@ export function PersonalizeSection({ full = false }: { full?: boolean }) {
             <br />
             <i>muy tuya.</i>
           </span>
-          <span className="concept-footnote">Un vistazo a lo que viene.</span>
+          <span className="concept-footnote">Concepto ilustrativo.</span>
           <span className="concept-dot" aria-hidden="true" />
         </div>
         <div className="personalize-copy">
@@ -122,7 +122,7 @@ export function PersonalizeSection({ full = false }: { full?: boolean }) {
             </h2>
           )}
           <p>El comienzo es un producto. Lo que lo hace especial lo pones tú.</p>
-          <p className="coming-soon">Próximamente: tu estudio de creación en línea.</p>
+          <p className="coming-soon">Tu idea empieza aquí. Agrega tu toque personal.</p>
           <ol className="steps">
             {steps.map((step, i) => (
               <li key={step}>
@@ -132,10 +132,10 @@ export function PersonalizeSection({ full = false }: { full?: boolean }) {
             ))}
           </ol>
           <p className="muted">
-            El personalizador está en camino. Por ahora, prepara tu idea y la exploraremos contigo
-            al habilitar el contacto.
+            Crea una vista previa de tu playera, sudadera o tote bag. Descárgala y compártela para
+            cotizar.
           </p>
-          <TextLink href="/contacto">Empecemos con tu idea</TextLink>
+          <TextLink href="/personaliza">Abrir el estudio de personalización</TextLink>
         </div>
       </div>
     </section>
@@ -147,9 +147,9 @@ export function BusinessSection() {
       <div className="business-copy">
         <Eyebrow>GENHORA BUSINESS & EVENTOS</Eyebrow>
         <h2>
-          Tu esencia,
+          Tu marca,
           <br />
-          <em>a otra escala.</em>
+          <em>en cada detalle.</em>
         </h2>
         <p>
           Una marca que se siente. Un equipo que se identifica. Una celebración que se recuerda.
@@ -159,7 +159,7 @@ export function BusinessSection() {
           importa.
         </p>
         <ButtonLink href="/empresas-y-eventos" secondary>
-          Creemos algo juntos
+          Explorar kits empresariales
         </ButtonLink>
       </div>
       <Photo src="paper-editorial" alt="Propuesta conceptual de papelería y detalles de marca" />

@@ -1,0 +1,373 @@
+/* Commerce additions share the existing brand tokens and editorial rhythm. */
+#soluciones,
+#kits,
+#business-quote {
+  scroll-margin-top: 130px;
+}
+.featured {
+  padding-top: var(--section-space);
+}
+.featured .featured-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  row-gap: 48px;
+}
+.product-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.product-card .product-personalization {
+  font-size: 11px;
+  line-height: 1.65;
+  color: #536a5b;
+  margin-top: 8px;
+}
+.product-action {
+  align-self: flex-start;
+  margin-top: 15px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.product-card > p {
+  max-width: 95%;
+}
+.product-card .product-collection {
+  margin: 0 0 11px;
+  color: #536a5b;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  min-height: 14px;
+}
+.commerce-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.business-hero .commerce-actions .button {
+  margin-top: 16px;
+}
+.business-hero .photo {
+  min-height: 430px;
+}
+.business-solutions,
+.kits-section,
+.commerce-process {
+  padding-block: 70px;
+  border-top: 1px solid var(--line);
+}
+.business-solutions h2,
+.kits-section h2,
+.commerce-process h2,
+.business-quote h2,
+.faq h2,
+.about-commerce h2 {
+  font-size: clamp(42px, 4.3vw, 62px);
+  line-height: 1.05;
+  margin: 14px 0 30px;
+}
+.business-solutions > div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 30px;
+}
+.business-solutions article {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.business-solutions h3 {
+  font-size: 29px;
+  margin: 18px 0 12px;
+}
+.business-solutions article p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #536a5b;
+}
+.kit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+.kit-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.kit-composition {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: #eae8df;
+  padding: 24px 10px 30px;
+  aspect-ratio: 1.15;
+  overflow: hidden;
+}
+.kit-composition .product-image {
+  width: 48%;
+  aspect-ratio: 1.15;
+  flex: none;
+  mix-blend-mode: multiply;
+}
+.kit-composition .product-image:nth-child(2) {
+  transform: rotate(7deg);
+}
+.kit-composition .product-image:nth-child(3) {
+  width: 42%;
+  margin-top: -17%;
+  transform: rotate(-6deg);
+}
+.kit-composition > span {
+  position: absolute;
+  bottom: 12px;
+  left: 14px;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+.kit-card h3 {
+  font-size: 35px;
+  margin: 22px 0 10px;
+}
+.kit-card > p {
+  font-size: 13px;
+  line-height: 1.75;
+}
+.kit-card .kit-items {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+.kit-card .field-help {
+  font-size: 11px;
+}
+.kit-card .text-link {
+  width: fit-content;
+  margin-top: auto;
+  padding: 14px 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--forest);
+  color: var(--forest);
+  cursor: pointer;
+}
+.business-quote {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 8%;
+  padding-block: 70px 90px;
+  background: #e8eee3;
+  border-block: 1px solid var(--line);
+}
+.business-quote-intro {
+  max-width: 370px;
+}
+.business-quote-intro > p {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.business-quote .brief-form > input,
+.business-quote .brief-form > select,
+.business-quote .brief-form > textarea {
+  margin-bottom: 24px;
+  background: #f9f7f0;
+}
+.business-quote .form-pair input {
+  background: #f9f7f0;
+}
+.business-quote .field-help,
+.field-help,
+.form-privacy {
+  font-size: 12px;
+}
+.field-help a,
+.form-privacy a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.product-checks {
+  border: 0;
+  padding: 0;
+  margin: 24px 0 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+.product-checks legend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.product-checks label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin: 0;
+  font-size: 12px;
+}
+.product-checks input {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  accent-color: var(--forest);
+}
+.form-error {
+  font-size: 13px;
+  padding: 12px;
+  border: 1px solid #8a4b3c;
+  color: #733e30;
+  margin-bottom: 16px;
+}
+.brief-result h3 {
+  font-size: 36px;
+  margin-bottom: 24px;
+}
+.commerce-process ol {
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
+}
+.commerce-process li {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+.commerce-process li > span {
+  font-size: 11px;
+}
+.commerce-process h3 {
+  font-size: 30px;
+  margin: 18px 0 12px;
+}
+.commerce-process li p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.faq {
+  padding-block: 70px;
+}
+.faq > div {
+  max-width: 880px;
+  margin-left: auto;
+}
+.faq details {
+  border-bottom: 1px solid var(--line);
+}
+.faq summary {
+  cursor: pointer;
+  padding: 23px 26px 23px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.faq details p {
+  padding: 0 35px 24px 0;
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 750px;
+}
+.about-commerce {
+  max-width: 950px;
+  padding-block: 55px;
+}
+.about-commerce > p:not(.eyebrow),
+.privacy-page > p {
+  font-size: 15px;
+  line-height: 1.9;
+  margin-bottom: 24px;
+}
+.privacy-page {
+  max-width: 880px;
+  padding-block: 60px 100px;
+}
+.privacy-page h1 {
+  font-size: clamp(52px, 7vw, 84px);
+}
+.privacy-page h2 {
+  font-size: 33px;
+  margin: 36px 0 14px;
+}
+@media (max-width: 1000px) {
+  .business-solutions > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .business-quote {
+    gap: 35px;
+    grid-template-columns: 1fr 1.2fr;
+  }
+  .kit-grid {
+    gap: 18px;
+  }
+}
+@media (max-width: 767px) {
+  .featured .featured-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 18px;
+  }
+  .product-info {
+    flex-direction: column;
+    align-items: start;
+    gap: 6px;
+  }
+  .product-action {
+    font-size: 11px;
+    gap: 8px;
+  }
+  .product-card .product-personalization {
+    font-size: 11px;
+  }
+  .business-quote {
+    display: block;
+    padding-block: 45px;
+  }
+  .business-quote-intro {
+    max-width: none;
+    margin-bottom: 32px;
+  }
+  .kit-grid {
+    grid-template-columns: 1fr;
+    gap: 45px;
+  }
+  .kit-composition {
+    aspect-ratio: 1.4;
+  }
+  .kit-composition .product-image {
+    width: 34%;
+  }
+  .kit-composition .product-image:nth-child(3) {
+    width: 33%;
+    margin: 0;
+  }
+  .business-hero .photo {
+    min-height: 330px;
+  }
+  .business-solutions,
+  .kits-section,
+  .commerce-process,
+  .faq {
+    padding-block: 45px;
+  }
+  .business-solutions h3 {
+    font-size: 27px;
+  }
+  .commerce-process ol {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .form-pair {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .faq summary {
+    font-size: 14px;
+  }
+  .brief-form label,
+  .brief-form label span {
+    font-size: 12px;
+  }
+  .business-quote .button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}

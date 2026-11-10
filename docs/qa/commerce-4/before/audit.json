@@ -1,0 +1,16 @@
+{
+  "home": {
+    "hero": "Tu idea,\nnuestro próximo\ngran diseño.",
+    "stale": 1
+  },
+  "catalog": {
+    "editorLinks": 0
+  },
+  "context": {
+    "selected": "false"
+  },
+  "business": {
+    "forms": 0,
+    "kitButtons": 0
+  }
+}

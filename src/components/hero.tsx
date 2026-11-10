@@ -9,24 +9,23 @@ export function Hero() {
     <>
       <section className={`${styles.hero} section-wrap`} aria-labelledby="hero-title">
         <div className={styles.copy}>
-          <Eyebrow>ESTUDIO CREATIVO DE PERSONALIZACIÓN</Eyebrow>
+          <Eyebrow>PERSONALIZA AQUÍ TUS PRODUCTOS</Eyebrow>
           <h1 id="hero-title" className={styles.title}>
-            <span>Tu idea,</span> <span>nuestro próximo</span> <em>gran diseño.</em>
+            <span>Tus ideas merecen</span> <span>convertirse en</span> <em>algo único.</em>
           </h1>
           <p className={styles.description}>
-            Personaliza productos que cuentan tu historia. Desde pequeños detalles hasta grandes
-            ideas para tu marca.
+            Personaliza playeras, sudaderas, tote bags, regalos y artículos para tu marca. Elige tu
+            producto, agrega tu diseño y crea algo verdaderamente tuyo.
           </p>
           <div className={styles.actions}>
-            <ButtonLink href="/productos">Empieza a crear</ButtonLink>
+            <ButtonLink href="/personaliza">Personalizar ahora</ButtonLink>
             <Link href="/productos" className={styles.explore}>
-              Explora nuestros productos <Arrow />
+              Explorar productos <Arrow />
             </Link>
           </div>
-          <p className={styles.signature}>
-            <span aria-hidden="true" />
-            Lo cotidiano, con algo de ti.
-          </p>
+          <Link className={styles.businessEntry} href="/empresas-y-eventos">
+            <span>PARA TU EMPRESA</span>Kits y regalos con tu marca <Arrow diagonal />
+          </Link>
         </div>
         <figure className={styles.stage} aria-describedby="hero-image-note">
           <div className={styles.scene}>
@@ -85,13 +84,13 @@ export function Hero() {
       <div className={styles.ribbon}>
         <ul className="section-wrap" aria-label="La esencia de GENHORA">
           <li>
-            <span aria-hidden="true">01</span>Diseñado para ti.
+            <span aria-hidden="true">01</span>Elige tu producto
           </li>
           <li>
-            <span aria-hidden="true">02</span>Hecho con intención.
+            <span aria-hidden="true">02</span>Crea tu diseño
           </li>
           <li>
-            <span aria-hidden="true">03</span>Creado para conectar.
+            <span aria-hidden="true">03</span>Solicita tu cotización
           </li>
           <li className={styles.ribbonSignature}>Es hora de crear.</li>
         </ul>

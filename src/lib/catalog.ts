@@ -32,10 +32,10 @@ export const lines = [
 ] as const;
 export type LineId = (typeof lines)[number]['id'];
 export const categories = [
-  { id: 'textiles', name: 'Textiles' },
-  { id: 'objetos', name: 'Objetos cotidianos' },
+  { id: 'textiles', name: 'Ropa y tote bags' },
+  { id: 'objetos', name: 'Accesorios y objetos' },
   { id: 'papeleria', name: 'Papelería y detalles' },
-  { id: 'corporativos', name: 'Corporativos' },
+  { id: 'corporativos', name: 'Para empresas' },
 ] as const;
 export type CategoryId = (typeof categories)[number]['id'];
 export type Product = {

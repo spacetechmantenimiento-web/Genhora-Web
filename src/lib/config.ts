@@ -10,7 +10,10 @@ export const siteConfig = {
   email: '',
   address: '',
   socialLinks: [] as { label: string; url: string }[],
-  legalLinks: [] as { label: string; url: string }[],
+  legalLinks: [{ label: 'Privacidad y datos', url: '/privacidad' }] as {
+    label: string;
+    url: string;
+  }[],
 };
 export function whatsappUrl(number: string, message: string): string | null {
   if (!/^[1-9]\d{7,14}$/.test(number)) return null;

@@ -1,82 +1,103 @@
 import type { Metadata } from 'next';
-import { ButtonLink, ClosingCTA, Eyebrow, Photo, TextLink } from '@/components/ui';
-export const metadata: Metadata = {
-  title: 'Empresas, eventos y comunidades',
-  description:
-    'Explora artículos promocionales, merchandising y detalles para celebraciones. Proyectos de personalización a tu medida.',
-};
+import { ButtonLink, Eyebrow, Photo } from '@/components/ui';
+import { BusinessExperience } from '@/components/business-experience';
+import { pageMetadata } from '@/lib/commerce';
+export const metadata: Metadata = pageMetadata(
+  'Kits corporativos y regalos para empresas',
+  'Prepara una propuesta de kits de bienvenida, regalos corporativos y merchandising con la identidad de tu empresa en México.',
+  '/empresas-y-eventos',
+);
 export default function Business() {
   return (
     <>
       <section className="business-hero section-wrap">
         <div>
-          <Eyebrow>EMPRESAS · EVENTOS · COMUNIDADES</Eyebrow>
+          <Eyebrow>GENHORA PARA EMPRESAS Y EVENTOS</Eyebrow>
           <h1>
-            Hay ideas que
+            Tu marca,
             <br />
-            se hacen <em>en grande.</em>
+            <em>en cada detalle.</em>
           </h1>
-          <p>Cuando un objeto lleva tu identidad, también lleva una parte de lo que representas.</p>
-          <ButtonLink href="/contacto?tipo=volumen">Planeemos tu proyecto</ButtonLink>
+          <p>
+            Creamos artículos personalizados y kits corporativos que hacen memorable la bienvenida,
+            el reconocimiento y cada encuentro de tu equipo.
+          </p>
+          <div className="commerce-actions">
+            <ButtonLink href="#business-quote">Cotizar kits empresariales</ButtonLink>
+            <ButtonLink href="#soluciones" secondary>
+              Explorar soluciones
+            </ButtonLink>
+          </div>
         </div>
-        <Photo
-          priority
-          src="paper-editorial"
-          alt="Concepto de papelería y objetos coordinados en crema y verde"
-        />
+        <div>
+          <Photo
+            priority
+            src="paper-editorial"
+            alt="Composición conceptual de libreta, papelería y detalles en verde y marfil"
+          />
+          <p className="image-note">
+            Referencia conceptual. Tu propuesta se define con los artículos elegidos.
+          </p>
+        </div>
       </section>
-      <section className="business-options section-wrap">
-        {[
-          {
-            number: '01',
-            title: 'Una marca que se siente.',
-            label: 'GENHORA BUSINESS',
-            text: 'Artículos corporativos, kits de bienvenida y productos promocionales. Pensemos en detalles coherentes con tu marca y relevantes para quienes los reciben.',
-            href: '/productos?linea=business',
-          },
-          {
-            number: '02',
-            title: 'Momentos para recordar.',
-            label: 'EVENTOS CON IDENTIDAD',
-            text: 'Invitaciones, recuerdos y pequeños detalles que conectan con tu celebración. Una misma idea, presente en cada parte de la experiencia.',
-            href: '/productos?linea=eventos',
-          },
-          {
-            number: '03',
-            title: 'Algo que nos representa.',
-            label: 'COMUNIDADES Y CREADORES',
-            text: 'Merchandising para artistas, colectivos, instituciones y creadores de contenido. Da a tu comunidad una nueva manera de reconocerse.',
-            href: '/productos?linea=comunidades',
-          },
-        ].map((item) => (
-          <article key={item.number}>
-            <span className="business-number">{item.number}</span>
-            <div>
-              <Eyebrow>{item.label}</Eyebrow>
-              <h2>{item.title}</h2>
-              <p>{item.text}</p>
-              <TextLink href={item.href}>Explora las posibilidades</TextLink>
-            </div>
-          </article>
-        ))}
-      </section>
-      <section className="project-brief section-wrap">
-        <Eyebrow>PARA EMPEZAR A IMAGINARLO</Eyebrow>
+      <section id="soluciones" className="business-solutions section-wrap">
+        <Eyebrow>OBJETOS QUE REPRESENTAN A TU MARCA</Eyebrow>
         <h2>
-          Un buen proyecto
+          Una intención.
           <br />
-          comienza con <em>una conversación.</em>
+          <em>Muchas posibilidades.</em>
         </h2>
-        <p>
-          Ten a la mano el tipo de producto, una cantidad estimada, la fecha que tienes en mente y
-          una descripción de tu idea. Los materiales, precios y tiempos se confirman en la
-          cotización.
-        </p>
-        <ButtonLink href="/contacto?tipo=volumen" secondary>
-          Prepara tu proyecto
-        </ButtonLink>
+        <div>
+          {[
+            [
+              'Kits de bienvenida',
+              'Para recibir a nuevos colaboradores con artículos que acompañen su día.',
+            ],
+            [
+              'Regalos corporativos',
+              'Para clientes, equipos y ocasiones que merecen un detalle personal.',
+            ],
+            [
+              'Eventos y congresos',
+              'Tote bags, libretas y artículos con la identidad de tu encuentro.',
+            ],
+            [
+              'Merchandising de marca',
+              'Playeras, sudaderas, termos y accesorios que hablan de tu proyecto.',
+            ],
+          ].map(([title, text], i) => (
+            <article key={title}>
+              <span className="eyebrow">0{i + 1}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </article>
+          ))}
+        </div>
       </section>
-      <ClosingCTA />
+      <BusinessExperience />
+      <section className="commerce-process section-wrap">
+        <Eyebrow>DEL PROYECTO A LA PROPUESTA</Eyebrow>
+        <h2>
+          Lo definimos <em>contigo.</em>
+        </h2>
+        <ol>
+          <li>
+            <span>01</span>
+            <h3>Cuéntanos tu proyecto</h3>
+            <p>Artículos, cantidad, marca, ciudad y fecha deseada.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <h3>Revisamos y cotizamos</h3>
+            <p>Consulta opciones, características y disponibilidad.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <h3>Confirma los detalles</h3>
+            <p>Acuerda diseño, condiciones de producción y entrega antes de realizar tu pedido.</p>
+          </li>
+        </ol>
+      </section>
     </>
   );
 }

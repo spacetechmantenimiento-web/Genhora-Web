@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { products, lines } from '@/lib/catalog';
 import { quoteHref } from '@/lib/config';
 import { ButtonLink, Eyebrow, ProductCard, ProductImage } from '@/components/ui';
+import { pageMetadata, personalizationHref } from '@/lib/commerce';
 export function generateStaticParams() {
   return products.map((p) => ({ slug: p.slug }));
 }
@@ -14,10 +15,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const p = products.find((p) => p.slug === slug);
-  return {
-    title: p ? `${p.name} para personalizar` : 'Producto no encontrado',
-    description: p?.description,
-  };
+  return pageMetadata(
+    p ? `${p.name} para personalizar` : 'Producto no encontrado',
+    p
+      ? `Personaliza ${p.name.toLowerCase()} con tu diseño o identidad de marca. Prepara tu proyecto y solicita una cotización en GENHORA.`
+      : 'Explora los productos personalizados de GENHORA.',
+    `/productos/${slug}`,
+  );
 }
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -25,7 +29,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   if (!p) notFound();
   return (
     <>
-      <section className="product-detail section-wrap">
+      <section className="product-detail section-wrap" data-product-page={p.slug}>
         <nav className="breadcrumbs" aria-label="Ruta de navegación">
           <Link href="/">Inicio</Link>
           <span>/</span>
@@ -51,7 +55,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 ))}
               </ul>
             </div>
-            <ButtonLink href={quoteHref(p.slug)}>Cotiza este producto</ButtonLink>
+            <ButtonLink href={personalizationHref(p.slug) ?? quoteHref(p.slug)}>
+              {personalizationHref(p.slug) ? 'Personalizar ahora' : 'Cotizar personalización'}
+            </ButtonLink>
+            {personalizationHref(p.slug) && (
+              <Link className="text-link" href={quoteHref(p.slug)}>
+                Prefiero cotizar mi idea
+              </Link>
+            )}
             <p className="muted">
               Cuéntanos tu diseño y la cantidad que imaginas. Precio, características y tiempo de
               entrega se definirán para tu proyecto.

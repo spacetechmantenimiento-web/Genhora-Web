@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { productPrice, type Product } from '@/lib/catalog';
+import { personalizationHref } from '@/lib/commerce';
+import { quoteHref } from '@/lib/config';
 
 export function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return (
@@ -95,10 +97,17 @@ export function ProductImage({
     />
   );
 }
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, collection }: { product: Product; collection?: string }) {
+  const editor = personalizationHref(product.slug);
   return (
     <article className="product-card">
-      <Link href={`/productos/${product.slug}`} aria-label={`Ver ${product.name.toLowerCase()}`}>
+      {collection && <p className="eyebrow product-collection">{collection}</p>}
+      <Link
+        href={`/productos/${product.slug}`}
+        aria-label={`Ver ${product.name.toLowerCase()}`}
+        data-commerce-event="select_product"
+        data-product-id={product.slug}
+      >
         <div className="product-frame">
           <ProductImage product={product} />
           <span className="product-open">
@@ -111,6 +120,20 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
       <p>{product.description}</p>
+      <p className="product-personalization">
+        {editor
+          ? 'Texto, imagen o logotipo en el estudio.'
+          : `Idea de personalización: ${product.ideas[0].toLowerCase()}.`}
+      </p>
+      <Link
+        className="text-link product-action"
+        href={editor ?? quoteHref(product.slug)}
+        data-commerce-event={editor ? 'select_product' : 'click_quote'}
+        data-product-id={product.slug}
+      >
+        {editor ? 'Personalizar ahora' : 'Cotizar personalización'}
+        <Arrow />
+      </Link>
     </article>
   );
 }

@@ -149,7 +149,10 @@ await run('A Sudadera completa, dos caras y exportación', async (page) => {
   assert.equal(await page.getByLabel('Color del texto').inputValue(), textColor);
   await page.getByRole('button', { name: 'Espalda', exact: true }).click();
   assert.equal(await page.getByRole('button', { name: 'ESPALDA', exact: true }).count(), 1);
-  await page.getByText('Color personalizado', { exact: true }).waitFor();
+  await page
+    .locator('p')
+    .filter({ hasText: /^Color personalizado$/ })
+    .waitFor();
   assert.equal(await page.getByText('Personalizado · #526A87').count(), 0);
   const back = await download(page, 'espalda', 'auditoria-sudadera-espalda');
   await page.getByRole('button', { name: 'Frente', exact: true }).click();
@@ -262,7 +265,10 @@ await run('D Historial, producto, cara, color y restablecer', async (page) => {
 
 await run('E Colores y volumen de la prenda', async (page) => {
   await page.getByRole('button', { name: 'Sudadera personalizada' }).click();
-  await page.getByText('Marfil', { exact: true }).waitFor();
+  await page
+    .locator('p')
+    .filter({ hasText: /^Marfil$/ })
+    .waitFor();
   assert.equal(await page.getByText('Marfil · #EDE9DA').count(), 0);
   await page.getByRole('checkbox', { name: 'Mostrar zona y margen de seguridad' }).uncheck();
   await page.getByRole('button', { name: 'Blanco', exact: true }).first().click();
@@ -270,7 +276,10 @@ await run('E Colores y volumen de la prenda', async (page) => {
   for (const color of ['blanco', 'negro', 'verde', 'rosa', 'hex']) {
     if (color === 'negro') {
       await page.getByRole('button', { name: 'Negro', exact: true }).first().click();
-      await page.getByText('Negro', { exact: true }).waitFor();
+      await page
+        .locator('p')
+        .filter({ hasText: /^Negro$/ })
+        .waitFor();
       assert.equal(await page.getByText('Negro · #242724').count(), 0);
     }
     if (color === 'verde') {
@@ -281,7 +290,10 @@ await run('E Colores y volumen de la prenda', async (page) => {
     if (color === 'hex') {
       await page.getByRole('textbox', { name: 'Código HEX' }).fill('#526A87');
       await page.getByRole('button', { name: 'Aplicar' }).click();
-      await page.getByText('Color personalizado', { exact: true }).waitFor();
+      await page
+        .locator('p')
+        .filter({ hasText: /^Color personalizado$/ })
+        .waitFor();
     }
     samples.push(
       await page.locator('canvas').evaluate((canvas) => {

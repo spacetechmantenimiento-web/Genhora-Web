@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { products } from '@/lib/catalog';
 import { createBrief, siteConfig, whatsappUrl } from '@/lib/config';
 import { Arrow } from './ui';
+import Link from 'next/link';
+import { trackCommerce } from '@/lib/analytics';
 export function ContactBrief({
   initialProduct = '',
   volume = false,
@@ -37,6 +39,7 @@ export function ContactBrief({
       onSubmit={(e) => {
         e.preventDefault();
         setPrepared(true);
+        trackCommerce('click_quote', { source: 'contact' });
         setCopied('');
         setTimeout(() => document.getElementById('brief-result')?.focus(), 0);
       }}
@@ -101,7 +104,8 @@ export function ContactBrief({
         <Arrow />
       </button>
       <p className="form-privacy">
-        Este formulario solo prepara un resumen en tu navegador. No envía ni guarda información.
+        Este formulario solo prepara un resumen en tu navegador. No envía ni guarda información.{' '}
+        <Link href="/privacidad">Privacidad y uso de datos</Link>.
       </p>
       {prepared && (
         <div className="brief-result" id="brief-result" tabIndex={-1}>
@@ -109,7 +113,13 @@ export function ContactBrief({
           <label htmlFor="summary">Tu resumen</label>
           <textarea id="summary" readOnly value={summary} rows={10} />
           {whatsapp ? (
-            <a className="button" href={whatsapp} target="_blank" rel="noreferrer">
+            <a
+              className="button"
+              href={whatsapp}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => trackCommerce('open_whatsapp_quote', { source: 'contact' })}
+            >
               Continuar en WhatsApp
               <Arrow />
             </a>

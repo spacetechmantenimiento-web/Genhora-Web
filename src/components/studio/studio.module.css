@@ -21,6 +21,64 @@
   line-height: 1.7;
   max-width: 550px;
 }
+.quoteEntry {
+  position: sticky;
+  top: 96px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 24px;
+  background: var(--ivory);
+  border-block: 1px solid #b9c8b9;
+  font-size: 12px;
+}
+.quoteEntry button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 0;
+  color: var(--ivory);
+  background: var(--forest);
+  font: 600 13px var(--font-body);
+  cursor: pointer;
+}
+.quote {
+  scroll-margin-top: 180px;
+}
+.quoteSummary {
+  margin: 24px 0;
+  font-size: 13px;
+}
+.quoteSummary > div {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid #b7cbb6;
+}
+.quoteSummary dt {
+  font-weight: 600;
+}
+.quoteSummary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1150px) {
+  .quoteEntry {
+    top: 86px;
+  }
+}
+@media (max-width: 600px) {
+  .quoteEntry {
+    top: 80px;
+    padding-inline: 0;
+  }
+  .quoteEntry span {
+    max-width: 120px;
+  }
+}
 .layout {
   display: grid;
   grid-template-columns: minmax(330px, 420px) minmax(0, 1fr);
@@ -373,7 +431,7 @@
 .previewColumn {
   min-width: 0;
   position: sticky;
-  top: 16px;
+  top: 172px;
 }
 .previewTop {
   display: flex;

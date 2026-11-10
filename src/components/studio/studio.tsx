@@ -29,6 +29,7 @@ import {
   type Side,
 } from '@/lib/studio';
 import styles from './studio.module.css';
+import { trackCommerce } from '@/lib/analytics';
 
 type History = { past: Designs[]; present: Designs; future: Designs[] };
 const newId = () => crypto.randomUUID();
@@ -38,8 +39,13 @@ const darkColor = (hex: string) => {
   return rgb[0] * 0.299 + rgb[1] * 0.587 + rgb[2] * 0.114 < 135;
 };
 
-export function Studio() {
-  const [productId, setProductId] = useState<ProductId>('playera');
+export function Studio({ initialProduct = 'playera' }: { initialProduct?: ProductId }) {
+  const [productId, setProductId] = useState<ProductId>(initialProduct);
+  const [entryProduct, setEntryProduct] = useState(initialProduct);
+  if (entryProduct !== initialProduct) {
+    setEntryProduct(initialProduct);
+    setProductId(initialProduct);
+  }
   const [history, setHistory] = useState<History>({
     past: [],
     present: initialDesigns,
@@ -72,6 +78,9 @@ export function Studio() {
   const layers = design.layers[design.side];
   const selected = layers.find((layer) => layer.id === selectedId);
   const color = colorHex(design.color);
+  useEffect(() => {
+    trackCommerce('start_personalization', { productId });
+  }, [productId]);
   const fontSignature = layers
     .filter((layer): layer is Extract<Artwork, { kind: 'text' }> => layer.kind === 'text')
     .map((layer) => `${layer.font}:${layer.weight ?? (layer.font === 'bold' ? 700 : 400)}`)
@@ -140,6 +149,7 @@ export function Studio() {
     );
   }
   function addText(text = 'Tu idea', font: FontId = 'serif') {
+    trackCommerce('add_custom_text', { productId });
     const layer: Artwork = {
       id: newId(),
       kind: 'text',
@@ -204,6 +214,7 @@ export function Studio() {
         reader.readAsDataURL(file);
       });
       addImage(src, file.name, width, height);
+      trackCommerce('upload_design', { productId });
       if (Math.min(width, height) < 600)
         setUploadError(
           'La resolución podría ser insuficiente para impresión. Esta advertencia no sustituye una revisión profesional.',
@@ -430,6 +441,7 @@ export function Studio() {
   async function download(side: Side) {
     try {
       const canvas = await renderExport(side);
+      trackCommerce('download_preview', { productId });
       const link = document.createElement('a');
       link.download = `genhora-${productId}-${side}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -486,7 +498,10 @@ export function Studio() {
     ]
       .filter(Boolean)
       .join('; ') || 'Por definir';
-  const message = `Hola, GENHORA. Me gustaría cotizar una personalización que preparé en su sitio web.\n\nProducto: ${product.name}\nColor: ${colorName(design.color)} (${color})\n${product.sizes ? `Talla: ${size}\n` : ''}Cantidad: ${quantity || 'Por definir'}\nPersonalización: ${personalization}\nUbicación: ${design.layers.espalda.length ? 'frente y espalda' : design.side}\nObservaciones: ${notes.trim() || 'Ninguna'}\n\nYa preparé una vista previa de mi diseño y me gustaría conocer su precio y tiempo estimado de elaboración.`;
+  const personalizedSides =
+    (['frente', 'espalda'] as const).filter((side) => design.layers[side].length).join(' y ') ||
+    'Por definir';
+  const message = `Hola, GENHORA. Me gustaría cotizar una personalización que preparé en su sitio web.\n\nProducto: ${product.name}\nColor: ${colorName(design.color)} (${color})\n${product.sizes ? `Talla: ${size}\n` : ''}Cantidad: ${quantity || 'Por definir'}\nPersonalización: ${personalization}\nUbicación: ${personalizedSides}\nObservaciones: ${notes.trim() || 'Ninguna'}\n\nYa preparé una vista previa de mi diseño y me gustaría conocer su precio y tiempo estimado de elaboración.`;
   const whatsapp = whatsappUrl(siteConfig.whatsappNumber, message);
   const validQuantity = /^\d+$/.test(quantity) && Number(quantity) > 0;
   return (
@@ -501,6 +516,21 @@ export function Studio() {
           complicaciones.
         </p>
       </header>
+      <div className={styles.quoteEntry}>
+        <span>¿Te encanta cómo quedó?</span>
+        <button
+          type="button"
+          onClick={() => {
+            trackCommerce('click_quote', { productId });
+            setCleanPreview(false);
+            requestAnimationFrame(() =>
+              document.getElementById('studio-quote')?.scrollIntoView({ block: 'start' }),
+            );
+          }}
+        >
+          Cotizar mi diseño ↗
+        </button>
+      </div>
       <div className={`${styles.layout} ${cleanPreview ? styles.previewLayout : ''}`}>
         {!cleanPreview && (
           <div className={styles.tools}>
@@ -974,7 +1004,10 @@ export function Studio() {
                 type="button"
                 className={styles.previewToggle}
                 aria-pressed={cleanPreview}
-                onClick={() => setCleanPreview((current) => !current)}
+                onClick={() => {
+                  if (!cleanPreview) trackCommerce('preview_design', { productId });
+                  setCleanPreview((current) => !current);
+                }}
               >
                 {cleanPreview ? 'Volver a editar' : 'Ver sin guías'}
               </button>
@@ -1045,10 +1078,40 @@ export function Studio() {
         </div>
       </div>
       {!cleanPreview && (
-        <section className={styles.quote}>
+        <section className={styles.quote} id="studio-quote">
           <div>
             <p className="eyebrow">LLEVA TU IDEA MÁS LEJOS</p>
-            <h2>Lista para imaginarla de verdad.</h2>
+            <h2>Tu creación GENHORA</h2>
+            <dl className={styles.quoteSummary}>
+              <div>
+                <dt>Producto</dt>
+                <dd>{product.name}</dd>
+              </div>
+              <div>
+                <dt>Color</dt>
+                <dd>
+                  {design.color.startsWith('#') ? 'Color personalizado' : colorName(design.color)}
+                </dd>
+              </div>
+              {product.sizes && (
+                <div>
+                  <dt>Talla</dt>
+                  <dd>{size}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Cantidad</dt>
+                <dd>{quantity || 'Por definir'}</dd>
+              </div>
+              <div>
+                <dt>Vistas personalizadas</dt>
+                <dd>{personalizedSides}</dd>
+              </div>
+              <div>
+                <dt>Observaciones</dt>
+                <dd>{notes.trim() || 'Sin observaciones'}</dd>
+              </div>
+            </dl>
             <p>
               Descarga tu propuesta y compártela al solicitar una cotización. El archivo no se
               adjunta automáticamente a WhatsApp.
@@ -1101,7 +1164,13 @@ export function Studio() {
                 </p>
               )}
               {whatsapp && validQuantity ? (
-                <a className={styles.whatsapp} href={whatsapp} target="_blank" rel="noreferrer">
+                <a
+                  className={styles.whatsapp}
+                  href={whatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackCommerce('open_whatsapp_quote', { productId })}
+                >
                   Cotizar por WhatsApp ↗
                 </a>
               ) : !whatsapp ? (

@@ -5,6 +5,9 @@ import { Footer } from '@/components/footer';
 import { Reveal } from '@/components/reveal';
 import './globals.css';
 import { siteConfig } from '@/lib/config';
+import { CommerceSignals } from '@/components/commerce-signals';
+import { organizationSchema } from '@/lib/commerce';
+import './commerce.css';
 const sans = localFont({
   src: '../../public/fonts/manrope-latin-variable.woff2',
   variable: '--font-manrope',
@@ -72,6 +75,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <Reveal />
+        <CommerceSignals />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema).replace(/</g, '\\u003c'),
+          }}
+        />
       </body>
     </html>
   );

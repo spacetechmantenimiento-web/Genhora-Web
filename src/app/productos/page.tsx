@@ -2,11 +2,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { categories, filterProducts, lines } from '@/lib/catalog';
 import { ClosingCTA, Eyebrow, ImageNote, ProductCard } from '@/components/ui';
-export const metadata: Metadata = {
-  title: 'Productos para hacer tuyos',
-  description:
-    'Explora playeras, sudaderas, tote bags, tazas, termos, papelería y artículos corporativos para personalizar.',
-};
+import { pageMetadata } from '@/lib/commerce';
+export const metadata: Metadata = pageMetadata(
+  'Catálogo de productos personalizados',
+  'Explora ropa, tote bags, tazas, termos y papelería para personalizar. Crea un diseño o cotiza artículos para tu empresa.',
+  '/productos',
+);
 type Params = { categoria?: string; linea?: string };
 export default async function Catalog({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams;
@@ -31,15 +32,15 @@ export default async function Catalog({ searchParams }: { searchParams: Promise<
             </>
           ) : (
             <>
-              Encuentra tu
+              Productos para
               <br />
-              <em>punto de partida.</em>
+              <em>hacer tuyos.</em>
             </>
           )}
         </h1>
         <p>
           {line?.description ??
-            'Elige un objeto. Imagina lo que puede llegar a ser. Nosotros te acompañamos a darle identidad.'}
+            'Personaliza playeras, sudaderas y tote bags en el estudio. Para tazas, termos, papelería y otros artículos, prepara tu solicitud de cotización.'}
         </p>
       </section>
       <section className="catalog section-wrap">
@@ -76,6 +77,7 @@ export default async function Catalog({ searchParams }: { searchParams: Promise<
             {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
           </p>
         </div>
+        <h2 className="sr-only">Resultados del catálogo</h2>
         {filtered.length ? (
           <div className="product-grid catalog-grid">
             {filtered.map((p) => (
